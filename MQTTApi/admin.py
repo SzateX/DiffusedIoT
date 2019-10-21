@@ -1,9 +1,10 @@
 from django.contrib import admin
 from .models import *
-# Register your models here.
+from guardian.admin import GuardedModelAdmin
 
-admin.register(Device)
-admin.register(DeviceUnit)
-admin.register(TemperatureUnit)
-admin.register(SwitchUnitValue)
-admin.register(HumidityUnitValue)
+
+admin.site.register(Device, GuardedModelAdmin)
+admin.site.register(DeviceUnit, GuardedModelAdmin)
+admin.site.register(TemperatureUnitValue, GuardedModelAdmin)
+admin.site.register(SwitchUnitValue, GuardedModelAdmin)
+admin.site.register(HumidityUnitValue, GuardedModelAdmin)

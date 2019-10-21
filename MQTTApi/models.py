@@ -11,7 +11,7 @@ class Device(models.Model):
         (DeviceType.GENERIC_LAMP, 'GL')
     )
     name = models.CharField(max_length=200)
-    type = models.CharField(choices=__TYPE_CHOICES, max_length=200)
+    type_of_device = models.CharField(choices=__TYPE_CHOICES, max_length=200)
 
 
 class DeviceUnit(models.Model):
@@ -29,7 +29,7 @@ class DeviceUnit(models.Model):
                                related_name='units',
                                max_length=200)
     direction = models.CharField(choices=__DIRECTION_CHOICES, max_length=200)
-    type = models.CharField(choices=__TYPE_CHOICES, max_length=200)
+    type_of_unit = models.CharField(choices=__TYPE_CHOICES, max_length=200)
 
 
 class GenericUnitValue(models.Model):
