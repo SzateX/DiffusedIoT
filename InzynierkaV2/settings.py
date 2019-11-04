@@ -37,8 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'MQTTApi',
-    'guardian'
+    'MQTTApi.apps.MqttapiConfig',
+    'AuthService',
+    # 'guardian'
 ]
 
 MIDDLEWARE = [
@@ -77,11 +78,20 @@ WSGI_APPLICATION = 'InzynierkaV2.wsgi.application'
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    'hub_db': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    },
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'NAME': 'auth_db'
     }
 }
+
+DATABASE_ROUTERS = ['MQTTApi.dbRouters.MQTTApiDbRouter']
 
 
 # Password validation
@@ -104,7 +114,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend', # default
-    'guardian.backends.ObjectPermissionBackend',
+    # 'guardian.backends.ObjectPermissionBackend'
 )
 
 # Internationalization
