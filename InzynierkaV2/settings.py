@@ -39,7 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'MQTTApi.apps.MqttapiConfig',
     'AuthService',
-    # 'guardian'
+    'guardian',
+    'rest_framework',
+    'rest_framework_api_key',
 ]
 
 MIDDLEWARE = [
@@ -114,7 +116,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend', # default
-    # 'guardian.backends.ObjectPermissionBackend'
+    'guardian.backends.ObjectPermissionBackend'
 )
 
 # Internationalization

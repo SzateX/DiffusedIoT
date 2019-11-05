@@ -1,11 +1,20 @@
 from django.db import models
 from MQTTApi.enums import DeviceType, UnitDirection, UnitType
+from rest_framework_api_key.models import AbstractAPIKey
 
 
 # Create your models here.
 class Hub(models.Model):
     private_address = models.GenericIPAddressField()
     public_address = models.GenericIPAddressField()
+
+
+class HubAPIKey(AbstractAPIKey):
+    organization = models.ForeignKey(
+        Hub,
+        on_delete=models.CASCADE,
+        related_name="api_keys",
+    )
 
 
 class Device(models.Model):

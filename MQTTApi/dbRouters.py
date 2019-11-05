@@ -19,8 +19,6 @@ class MQTTApiDbRouter:
         return None
 
     def allow_migrate(self, db, app_label, model_name=None, **hints):
-        print(app_label)
-        print(self.app_labels)
         if app_label in self.app_labels:
             return db == self.db_key_name
         return None
