@@ -3,8 +3,11 @@
         <title>AuthService - Users</title>
     </head>
     <body>
+        <a href="{% url 'user_create' %}">Add user</a><br>
+        List of users:<br>
         {% for user in users %}
-            {{ user.username }}<br>
+            {{ user.username }} - <a href="{% url 'user_update' user.pk %}">Update</a>
+            <a href="{% url 'user_delete' user.pk %}">Delete</a><br>
         {% endfor %}
     </body>
 </html>

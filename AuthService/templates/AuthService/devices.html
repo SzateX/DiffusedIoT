@@ -4,7 +4,7 @@
     </head>
     <body>
         {% for device in devices %}
-            {{ device.name }} {{ device.type_of_device }} <br>
+            <a href="{%  url 'units' hub=device.hub.pk device=device.pk%}">{{ device.name }} {{ device.type_of_device }}</a> <br>
         {% endfor %}
     </body>
 </html>
