@@ -1,0 +1,10 @@
+<html>
+    <head>
+        <title>AuthService - Hubs</title>
+    </head>
+    <body>
+        {% for hub in hubs %}
+            {{ hub.name }} {{ hub.private_address }} {{ hub.public_address }} <br>
+        {% endfor %}
+    </body>
+</html>
