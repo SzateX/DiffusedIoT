@@ -3,9 +3,15 @@
         <title>AuthService - Hubs</title>
     </head>
     <body>
+        {% if has_api_key %}
+            <h1>Dodano Hub. API KEY to: {{ api_key }}</h1>
+        {% endif %}
         <a href="{% url 'hub_create' %}">Add Hub</a>
         {% for hub in hubs %}
-            <a href="{% url 'devices' hub.pk %}">{{ hub.name }} {{ hub.private_address }} {{ hub.public_address }}</a> <br>
+            <a href="{% url 'hub_details' hub.pk %}">{{ hub.name }} {{ hub.private_address }} {{ hub.public_address }}</a>
+            <a href="{% url 'hub_update' hub.pk %}">Edit</a> <a href="{% url 'hub_delete' hub.pk %}">Delete</a>
+            <a href="{% url 'hub_reset_key' hub.pk %}">Reset Key</a>
+            <br>
         {% endfor %}
     </body>
 </html>
