@@ -10,5 +10,5 @@ class HubAPIKeyModelAdmin(APIKeyModelAdmin):
 
 
 # Register your models here.
-admin.site.register(Device)
-admin.site.register(DeviceUnit)
+# admin.site.register(Device)
+# admin.site.register(DeviceUnit)

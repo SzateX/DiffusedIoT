@@ -9,7 +9,7 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.views.generic import TemplateView, ListView, CreateView, \
     UpdateView, DeleteView, DetailView, RedirectView
 
-from AuthService.models import Hub, Device, DeviceUnit, HubAPIKey
+from AuthService.models import Hub, HubAPIKey
 
 LOGIN_URL = '/dashboard/login'
 PERMISSION_DENIED_MESSAGE = 'Sorry, you need to have admin, to see this site.'
@@ -177,30 +177,30 @@ class HubResetApiKey(UserPassesTestMixin, RedirectView):
         return url + "?key=" + key
 
 
-class DevicesView(UserPassesTestMixin, ListView):
-    login_url = LOGIN_URL
-    permission_denied_message = PERMISSION_DENIED_MESSAGE
-    template_name = "AuthService/devices.html"
-    context_object_name = "devices"
-
-    def test_func(self):
-        return self.request.user.is_staff
-
-    def get_queryset(self):
-        hub = get_object_or_404(Hub, pk=self.kwargs['hub'])
-        return Device.objects.filter(hub=hub)
-
-
-class DeviceUnitsView(UserPassesTestMixin, ListView):
-    login_url = LOGIN_URL
-    permission_denied_message = PERMISSION_DENIED_MESSAGE
-    template_name = "AuthService/units.html"
-    context_object_name = "units"
-
-    def test_func(self):
-        return self.request.user.is_staff
-
-    def get_queryset(self):
-        hub = get_object_or_404(Hub, pk=self.kwargs['hub'])
-        device = get_object_or_404(Device, pk=self.kwargs['device'], hub=hub)
-        return DeviceUnit.objects.filter(device=device)
+# class DevicesView(UserPassesTestMixin, ListView):
+#     login_url = LOGIN_URL
+#     permission_denied_message = PERMISSION_DENIED_MESSAGE
+#     template_name = "AuthService/devices.html"
+#     context_object_name = "devices"
+#
+#     def test_func(self):
+#         return self.request.user.is_staff
+#
+#     def get_queryset(self):
+#         hub = get_object_or_404(Hub, pk=self.kwargs['hub'])
+#         return Device.objects.filter(hub=hub)
+#
+#
+# class DeviceUnitsView(UserPassesTestMixin, ListView):
+#     login_url = LOGIN_URL
+#     permission_denied_message = PERMISSION_DENIED_MESSAGE
+#     template_name = "AuthService/units.html"
+#     context_object_name = "units"
+#
+#     def test_func(self):
+#         return self.request.user.is_staff
+#
+#     def get_queryset(self):
+#         hub = get_object_or_404(Hub, pk=self.kwargs['hub'])
+#         device = get_object_or_404(Device, pk=self.kwargs['device'], hub=hub)
+#         return DeviceUnit.objects.filter(device=device)
