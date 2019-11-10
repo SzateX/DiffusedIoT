@@ -14,7 +14,7 @@ urlpatterns = [
     url(r'^dashboard/hubs/(?P<pk>\d+)/delete/$', v.HubDeleteView.as_view(), name='hub_delete'),
     # url(r'^dashboard/hubs/(?P<pk>\d+)/devices/$', v.DevicesView.as_view(),
     #     name='devices'),
-    # url(r'^dashboard/hubs/(?P<hub>\d+)/reset_key/$', v.HubResetApiKey.as_view(), name='hub_reset_key'),
+    url(r'^dashboard/hubs/(?P<hub>\d+)/reset_key/$', v.HubResetApiKey.as_view(), name='hub_reset_key'),
     # url(r'^dashboard/hubs/(?P<hub>\d+)/devices/(?P<device>\d+)/units/$',
     #     v.DeviceUnitsView.as_view(), name='units'),
     # url(r'^dashboard/login/$', v.UserLoginView.as_view(), name='login'),

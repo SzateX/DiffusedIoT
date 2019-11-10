@@ -8,6 +8,7 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 # Create your views here.
 from django.views.generic import TemplateView, ListView, CreateView, \
     UpdateView, DeleteView, DetailView, RedirectView
+from rest_framework.views import APIView
 
 from AuthService.models import Hub, HubAPIKey
 
@@ -103,8 +104,15 @@ class HubsView(UserPassesTestMixin, ListView):
         key = self.request.GET.get('key', None)
         if key:
             context['api_key'] = key
+            context['created'] = self.request.GET.get('c', False)
+            if context['created']:
+                if context['created'] in ["False", 'false', '0']:
+                    context['created'] = False
+                else:
+                    context['created'] = True
         context['has_api_key'] = key is not None
         return context
+
 
 class HubView(UserPassesTestMixin, DetailView):
     login_url = LOGIN_URL
@@ -131,7 +139,7 @@ class HubCreateView(UserPassesTestMixin, CreateView):
     def form_valid(self, form):
         self.object = form.save()
         api_key, key = HubAPIKey.objects.create_key(name=self.object.name, organization=self.object)
-        return HttpResponseRedirect(self.get_success_url() + "?key=" + key)
+        return HttpResponseRedirect(self.get_success_url() + "?key=" + key + "&c=True")
 
 
 class HubUpdateView(UserPassesTestMixin, UpdateView):
@@ -174,8 +182,12 @@ class HubResetApiKey(UserPassesTestMixin, RedirectView):
             key.revoked = True
             key.save()
         api_key, key = HubAPIKey.objects.create_key(name=hub.name, organization=hub)
-        return url + "?key=" + key
+        return url + "?key=" + key + "&c=False"
 
+
+class RegisterDeviceView(APIView):
+    def post(self, request, format=None):
+        pass
 
 # class DevicesView(UserPassesTestMixin, ListView):
 #     login_url = LOGIN_URL
