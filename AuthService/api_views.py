@@ -12,10 +12,6 @@ class HubListView(mixins.ListModelMixin, generics.GenericAPIView):
     serializer_class = HubSerializer
 
     def get(self, request, *args, **kwargs):
-        # print(HubAPIKey.objects.filter(organization=3))
-        # print(dir(HubAPIKey.objects.get(organization=3, revoked=False)))
-        # print(HubAPIKey.objects.get(organization=4, revoked=False).is_valid("6CTZS7Nz.VY3InnCDpMF8q2Mt4qd5AYKYOWZ0Y1KX"))
-        # print(HubAPIKey.objects.get(organization=4, revoked=False).is_valid("zK7eaK8j.5GmCUoCtCtOJc6WP7GH94cVzBb8pGYzU"))
         return self.list(request, *args, **kwargs)
 
 
