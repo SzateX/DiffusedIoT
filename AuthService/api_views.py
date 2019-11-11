@@ -6,6 +6,20 @@ from .serializers import *
 from .models import *
 from rest_framework.views import APIView
 
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
+
+
+class APIUserLoginView(TokenObtainPairView):
+    pass
+
+
+class APIRefreshUserToken(TokenRefreshView):
+    pass
+
+
+class APIVerifyUserToken(TokenVerifyView):
+    pass
+
 
 class HubListView(mixins.ListModelMixin, generics.GenericAPIView):
     queryset = Hub.objects.all()

@@ -139,3 +139,11 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 API_KEY_CUSTOM_HEADER = "HTTP_X_API_KEY"
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
