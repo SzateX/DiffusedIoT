@@ -1,5 +1,6 @@
 from django.conf.urls import url
 import AuthService.views as v
+import AuthService.api_urls as api_urls
 
 urlpatterns = [
     url(r'^dashboard/$', v.DashboardView.as_view(), name='dashboard'),
@@ -20,4 +21,4 @@ urlpatterns = [
     # url(r'^dashboard/login/$', v.UserLoginView.as_view(), name='login'),
     # url(r'^dashboard/logout/$', v.UserLogoutView.as_view(), name='logout'),
 
-]
+] + api_urls.api_url_patterns

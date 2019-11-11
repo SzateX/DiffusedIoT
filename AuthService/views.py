@@ -183,11 +183,7 @@ class HubResetApiKey(UserPassesTestMixin, RedirectView):
             key.save()
         api_key, key = HubAPIKey.objects.create_key(name=hub.name, organization=hub)
         return url + "?key=" + key + "&c=False"
-
-
-class RegisterDeviceView(APIView):
-    def post(self, request, format=None):
-        pass
+    
 
 # class DevicesView(UserPassesTestMixin, ListView):
 #     login_url = LOGIN_URL
