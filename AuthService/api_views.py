@@ -52,3 +52,48 @@ class HubValidApiKeyView(APIView):
             }
             return Response(HubApiKeyValidateSerialzier(data).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class RegisterDeviceAPIView(APIView):
+    def post(self, request, format=None):
+        serializer = RegisterDeviceSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UsersView(APIView):
+    def get_object(self, pk):
+        try:
+            user = User.objects.get(pk=pk)
+            return user
+        except User.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk=None, format=None):
+        if pk is not None:
+            obj = User.objects.all()
+        else:
+            obj = self.get_object(pk)
+        serializer = UserSerializer(obj, many=pk is not None)
+        return Response(serializer.data)
+
+
+class GroupsView(APIView):
+    def get_object(self, pk):
+        try:
+            user = Group.objects.get(pk=pk)
+            return user
+        except User.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk=None, format=None):
+        if pk is not None:
+            obj = Group.objects.all()
+        else:
+            obj = self.get_object(pk)
+        serializer = GroupSerializer(obj, many=pk is not None)
+        return Response(serializer.data)
+
+

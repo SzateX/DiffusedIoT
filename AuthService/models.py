@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User, Group
 from django.db import models
 from MQTTApi.enums import DeviceType, UnitDirection, UnitType
 from rest_framework_api_key.models import AbstractAPIKey
@@ -22,6 +23,19 @@ class RegisteredDevice(models.Model):
     hub = models.ForeignKey(Hub, on_delete=models.CASCADE, related_name="registred_devices")
     device_id = models.IntegerField()
 
+
+class UserDevicePermission(models.Model):
+    device = models.ForeignKey(RegisteredDevice, on_delete=models.CASCADE, related_name="device_user_perms")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_perms")
+    read_permission = models.BooleanField()
+    write_permission = models.BooleanField()
+
+
+class GroupDevicePermission(models.Model):
+    device = models.ForeignKey(RegisteredDevice, on_delete=models.CASCADE, related_name="device_group_perms")
+    user = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="group_perms")
+    read_permission = models.BooleanField()
+    write_permission = models.BooleanField()
 
 # class Device(models.Model):
 #     __TYPE_CHOICES = (

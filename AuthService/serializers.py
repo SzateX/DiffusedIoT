@@ -16,3 +16,20 @@ class HubApiKeyValidateSerialzier(serializers.Serializer):
     is_valid = serializers.BooleanField()
     hub_id = serializers.IntegerField()
     api_key = serializers.CharField()
+
+
+class RegisterDeviceSerializer(serializers.Serializer):
+    hub = serializers.PrimaryKeyRelatedField()
+    device_id = serializers.IntegerField()
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('pk', 'username')
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ('pk', 'name')
