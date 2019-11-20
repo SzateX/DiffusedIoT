@@ -72,11 +72,11 @@ class UsersView(APIView):
             raise Http404
 
     def get(self, request, pk=None, format=None):
-        if pk is not None:
+        if pk is None:
             obj = User.objects.all()
         else:
             obj = self.get_object(pk)
-        serializer = UserSerializer(obj, many=pk is not None)
+        serializer = UserSerializer(obj, many=pk is None)
         return Response(serializer.data)
 
 
@@ -89,11 +89,104 @@ class GroupsView(APIView):
             raise Http404
 
     def get(self, request, pk=None, format=None):
-        if pk is not None:
+        if pk is None:
             obj = Group.objects.all()
         else:
             obj = self.get_object(pk)
-        serializer = GroupSerializer(obj, many=pk is not None)
+        serializer = GroupSerializer(obj, many=pk is None)
         return Response(serializer.data)
 
 
+class DeviceUserPermissionsView(APIView):
+    def get_object(self, model, **kwargs):
+        try:
+            return model.objects.get(**kwargs)
+        except model.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk=None, format=None):
+        hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
+        device = self.get_object(RegisteredDevice, hub=hub, pk=self.kwargs.get("device"))
+        if pk is None:
+            obj = UserDevicePermission.objects.filter(device=device)
+        else:
+            obj = self.get_object(UserDevicePermission, device=device, pk=pk)
+        serializer = UserDevicePermissionSerializer(obj, many=pk is None)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
+        device = self.get_object(RegisteredDevice, hub=hub, pk=self.kwargs.get("device"))
+        serializer = UserDevicePermissionSerializer(request.data)
+        if serializer.is_valid():
+            if device.pk != serializer.data.get("device"):
+                return Response(serializer.errors,
+                                status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk, format=None):
+        hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
+        device = self.get_object(RegisteredDevice, hub=hub, pk=self.kwargs.get("device"))
+        obj = self.get_object(UserDevicePermission, device=device, pk=pk)
+        serializer = UserDevicePermissionSerializer(obj, request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
+        device = self.get_object(RegisteredDevice, hub=hub,
+                                 pk=self.kwargs.get("device"))
+        obj = self.get_object(UserDevicePermission, device=device, pk=pk)
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class DeviceGroupPermissionsView(APIView):
+    def get_object(self, model, **kwargs):
+        try:
+            return model.objects.get(**kwargs)
+        except model.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk=None, format=None):
+        hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
+        device = self.get_object(RegisteredDevice, hub=hub, pk=self.kwargs.get("device"))
+        if pk is None:
+            obj = GroupDevicePermission.objects.filter(device=device)
+        else:
+            obj = self.get_object(GroupDevicePermission, device=device, pk=pk)
+        serializer = GroupDevicePermissionSerializer(obj, many=pk is None)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
+        device = self.get_object(RegisteredDevice, hub=hub, pk=self.kwargs.get("device"))
+        serializer = GroupDevicePermissionSerializer(request.data)
+        if serializer.is_valid():
+            if device.pk != serializer.data.get("device"):
+                return Response(serializer.errors,
+                                status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk, format=None):
+        hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
+        device = self.get_object(RegisteredDevice, hub=hub, pk=self.kwargs.get("device"))
+        obj = self.get_object(GroupDevicePermission, device=device, pk=pk)
+        serializer = GroupDevicePermissionSerializer(obj, request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
+        device = self.get_object(RegisteredDevice, hub=hub, pk=self.kwargs.get("device"))
+        obj = self.get_object(GroupDevicePermission, device=device, pk=pk)
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

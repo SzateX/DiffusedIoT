@@ -19,7 +19,7 @@ class HubApiKeyValidateSerialzier(serializers.Serializer):
 
 
 class RegisterDeviceSerializer(serializers.Serializer):
-    hub = serializers.PrimaryKeyRelatedField()
+    hub = serializers.PrimaryKeyRelatedField(queryset=Hub.objects)
     device_id = serializers.IntegerField()
 
 
@@ -33,3 +33,25 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ('pk', 'name')
+
+
+class UserDevicePermissionSerializer(serializers.ModelSerializer):
+    device = serializers.PrimaryKeyRelatedField(queryset=RegisteredDevice.objects)
+    user = serializers.PrimaryKeyRelatedField(queryset=Group.objects)
+    read_permission = serializers.BooleanField()
+    write_permission = serializers.BooleanField()
+
+    class Meta:
+        model = UserDevicePermission
+        fields = ('pk', 'device', 'user', 'read_permission', 'write_permission')
+
+
+class GroupDevicePermissionSerializer(serializers.ModelSerializer):
+    device = serializers.PrimaryKeyRelatedField(queryset=RegisteredDevice.objects)
+    group = serializers.PrimaryKeyRelatedField(queryset=Group.objects)
+    read_permission = serializers.BooleanField()
+    write_permission = serializers.BooleanField()
+
+    class Meta:
+        model = GroupDevicePermission
+        fields = ('pk', 'device', 'user', 'read_permission', 'write_permission')

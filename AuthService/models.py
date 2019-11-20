@@ -33,7 +33,7 @@ class UserDevicePermission(models.Model):
 
 class GroupDevicePermission(models.Model):
     device = models.ForeignKey(RegisteredDevice, on_delete=models.CASCADE, related_name="device_group_perms")
-    user = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="group_perms")
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="group_perms")
     read_permission = models.BooleanField()
     write_permission = models.BooleanField()
 
