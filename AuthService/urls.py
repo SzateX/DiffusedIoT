@@ -18,7 +18,7 @@ urlpatterns = [
     url(r'^dashboard/hubs/(?P<hub>\d+)/reset_key/$', v.HubResetApiKey.as_view(), name='hub_reset_key'),
     # url(r'^dashboard/hubs/(?P<hub>\d+)/devices/(?P<device>\d+)/units/$',
     #     v.DeviceUnitsView.as_view(), name='units'),
-    # url(r'^dashboard/login/$', v.UserLoginView.as_view(), name='login'),
-    # url(r'^dashboard/logout/$', v.UserLogoutView.as_view(), name='logout'),
+    url(r'^dashboard/login/$', v.UserLoginView.as_view(), name='login'),
+    url(r'^dashboard/logout/$', v.UserLogoutView.as_view(), name='logout'),
 
 ] + api_urls.api_url_patterns
