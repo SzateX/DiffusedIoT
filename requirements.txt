@@ -10,3 +10,4 @@ pytz==2019.3
 sqlparse==0.3.0
 mysqlclient-1.4.4-cp37-cp37m-win32.whl ; sys_platform == "win32"
 django-dbrouter
+requests

@@ -151,3 +151,5 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
+
+AUTH_SERVICE_ADDRESS = "http://127.0.0.1:8000"

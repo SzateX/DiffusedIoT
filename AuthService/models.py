@@ -2,6 +2,7 @@ from django.contrib.auth.models import User, Group
 from django.db import models
 from MQTTApi.enums import DeviceType, UnitDirection, UnitType
 from rest_framework_api_key.models import AbstractAPIKey
+from InzynierkaV2.settings import INSTALLED_APPS
 
 
 # Create your models here.
