@@ -63,6 +63,16 @@ class HubLoginView(FormView):
         return {self.request.get_host(), *self.success_url_allowed_hosts}
 
 
+class HubLogoutView(TemplateView):
+    next_page = "/hub/dashboard/"
+
+    def dispatch(self, request, *args, **kwargs):
+        response = HttpResponseRedirect(self.next_page)
+        response.delete_cookie("user_token")
+        response.delete_cookie("refresh_token")
+        return response
+
+
 class HubDashboard(HubLoginRequiredMixin, TemplateView):
     template_name = 'MQTTApi/dashboard.html'
     login_url = '/hub/login'
