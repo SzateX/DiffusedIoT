@@ -16,7 +16,7 @@ class HubAuthorizationForm(forms.Form):
 
     def clean(self):
         super(HubAuthorizationForm, self).clean()
-        response = requests.post(AUTH_SERVICE_ADDRESS + "/authService/api/user_auth/sign_in/", json={
+        response = requests.post(AUTH_SERVICE_ADDRESS + "/api/user_auth/sign_in/", json={
             "username": self.cleaned_data.get("username"),
             "password": self.cleaned_data.get("password")
         })
