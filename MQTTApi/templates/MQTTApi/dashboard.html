@@ -3,6 +3,9 @@
         <title>Dasboard</title>
     </head>
     <body>
-        <a href="{% url 'hub_logout' %}">Logout</a>
+        <a href="{% url 'hub_logout' %}">Logout</a><br><br>
+        {% for hub in hubs %}
+            <a href="{% url 'hub_devices' hub.pk %}">{{ hub.name }} {{ hub.public_address }} {{ hub.private_address }}</a>
+        {% endfor %}
     </body>
 </html>

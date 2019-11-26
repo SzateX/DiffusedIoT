@@ -76,3 +76,68 @@ class HubLogoutView(TemplateView):
 class HubDashboard(HubLoginRequiredMixin, TemplateView):
     template_name = 'MQTTApi/dashboard.html'
     login_url = '/hub/login'
+
+    def get_hubs(self):
+        response = requests.get(
+            AUTH_SERVICE_ADDRESS + "/api/hubs/")
+
+        if response.status_code != 200:
+            raise Exception("Error in connection with AuthService: "
+                            + response.content)
+
+        return response.json()
+
+    def get(self, request, *args, **kwargs):
+        self.hubs = self.get_hubs()
+        return super(HubDashboard, self).get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(HubDashboard, self).get_context_data(**kwargs)
+        context['hubs'] = self.hubs
+        print(self.hubs)
+        return context
+
+
+class HubDeviceView(HubLoginRequiredMixin, TemplateView):
+    template_name = 'MQTTApi/device.html'
+    login_url = '/hub/login'
+
+    def get_me(self):
+        response = requests.get(
+            AUTH_SERVICE_ADDRESS + "/api/get_me/",
+            headers={
+                'Authorization': "Bearer " + self.request.COOKIES.get('user_token')
+            }
+        )
+
+        if response.status_code != 200:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+
+        return response.json()
+
+    def get_user_permissions(self):
+        response = requests.get(
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%d/registred_devices/user_permissions/" % int(self.kwargs['hub']))
+
+        if response.status_code != 200:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+
+        return response.json()
+
+    def get_group_permissions(self):
+        response = requests.get(
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%d/registred_devices/group_permissions/" % int(self.kwargs['hub']))
+
+        if response.status_code != 200:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+
+        return response.json()
+
+    def get(self, request, *args, **kwargs):
+        print(self.get_me())
+        print(self.get_user_permissions())
+        print(self.get_group_permissions())
+        return super(HubDeviceView, self).get(request, *args, **kwargs)

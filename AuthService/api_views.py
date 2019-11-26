@@ -1,5 +1,6 @@
 from django.http import Http404
 from rest_framework import mixins, generics, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .serializers import *
@@ -190,3 +191,40 @@ class DeviceGroupPermissionsView(APIView):
         obj = self.get_object(GroupDevicePermission, device=device, pk=pk)
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class DeviceUserPermissionListView(APIView):
+    def get_object(self, model, **kwargs):
+        try:
+            return model.objects.get(**kwargs)
+        except model.DoesNotExist:
+            raise Http404
+
+    def get(self, request, hub, format=None):
+        hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
+        devices = RegisteredDevice.objects.filter(hub=hub)
+        user_permission = UserDevicePermission.objects.filter(device__in=devices)
+        serializer = UserDevicePermissionSerializer(user_permission, many=True)
+        return Response(serializer.data)
+
+
+class DeviceGroupPermissionListView(APIView):
+    def get_object(self, model, **kwargs):
+        try:
+            return model.objects.get(**kwargs)
+        except model.DoesNotExist:
+            raise Http404
+
+    def get(self, request, hub, format=None):
+        hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
+        devices = RegisteredDevice.objects.filter(hub=hub)
+        group_permission = GroupDevicePermission.objects.filter(device__in=devices)
+        serializer = GroupDevicePermissionSerializer(group_permission, many=True)
+        return Response(serializer.data)
+
+
+class GetMe(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        return Response(MeSerializer(self.request.user).data)

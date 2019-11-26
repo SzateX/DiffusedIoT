@@ -12,12 +12,13 @@ from rest_framework.views import APIView
 
 from AuthService.models import Hub, HubAPIKey
 
-LOGIN_URL = '/dashboard/login'
+LOGIN_URL = '/authService/dashboard/login'
 PERMISSION_DENIED_MESSAGE = 'Sorry, you need to have admin, to see this site.'
 
 
 class UserLoginView(LoginView):
     success_url = "/authService/dashboard"
+    template_name = "AuthService/login.html"
 
 
 class UserLogoutView(LogoutView):

@@ -5,7 +5,7 @@ from .models import *
 class HubSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hub
-        fields = ('pk', 'private_address', 'public_address')
+        fields = ('pk', 'name', 'private_address', 'public_address')
 
 
 class HubApiKeySerializer(serializers.Serializer):
@@ -55,3 +55,11 @@ class GroupDevicePermissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupDevicePermission
         fields = ('pk', 'device', 'user', 'read_permission', 'write_permission')
+
+
+class MeSerializer(serializers.ModelSerializer):
+    groups = GroupSerializer(many=True)
+
+    class Meta:
+        model = User
+        fields = ('pk', 'username', 'groups')
