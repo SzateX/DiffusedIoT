@@ -62,4 +62,4 @@ class MeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('pk', 'username', 'groups')
+        fields = ('pk', 'username', 'groups', 'is_staff')

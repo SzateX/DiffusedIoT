@@ -9,6 +9,7 @@ from django.views.generic import FormView, DetailView, TemplateView
 from InzynierkaV2 import settings
 from InzynierkaV2.settings import AUTH_SERVICE_ADDRESS
 from MQTTApi.forms import HubAuthorizationForm
+from MQTTApi.models import Device
 
 
 class HubLoginRequiredMixin(AccessMixin):
@@ -137,7 +138,17 @@ class HubDeviceView(HubLoginRequiredMixin, TemplateView):
         return response.json()
 
     def get(self, request, *args, **kwargs):
-        print(self.get_me())
-        print(self.get_user_permissions())
-        print(self.get_group_permissions())
+        me = self.get_me()
+        user_permissions = self.get_user_permissions()
+        group_permissions = self.get_group_permissions()
+        self.objects = self.get_objects(me, user_permissions, group_permissions)
         return super(HubDeviceView, self).get(request, *args, **kwargs)
+
+    def get_objects(self, me, user_permissions, group_permissions):
+        if me['is_staff']:
+            return Device.objects.all()
+        groups_pk = map(lambda group: group['pk'], me['groups'])
+        filtered_group_permissions = filter(lambda x: x['pk'] in groups_pk and x['read_permission'] == True, group_permissions)
+        filtered_user_permissions = filter(lambda x: x['pk'] == me['pk'] and x['read_permission'] == True, user_permissions)
+        devices_pk = set(map(lambda x: x['device'], filtered_group_permissions)).union(set(map(lambda x: x['device'], filtered_user_permissions)))
+        return Device.objects.filter(pk__in=devices_pk)
