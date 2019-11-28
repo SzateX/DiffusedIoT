@@ -200,10 +200,13 @@ class DeviceUserPermissionListView(APIView):
         except model.DoesNotExist:
             raise Http404
 
-    def get(self, request, hub, format=None):
+    def get(self, request, hub, user=None, format=None):
         hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
         devices = RegisteredDevice.objects.filter(hub=hub)
-        user_permission = UserDevicePermission.objects.filter(device__in=devices)
+        if user != None:
+            user_permission = UserDevicePermission.objects.filter(device__in=devices, user_pk=user)
+        else:
+            user_permission = UserDevicePermission.objects.filter(device__in=devices)
         serializer = UserDevicePermissionSerializer(user_permission, many=True)
         return Response(serializer.data)
 
@@ -218,7 +221,10 @@ class DeviceGroupPermissionListView(APIView):
     def get(self, request, hub, format=None):
         hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
         devices = RegisteredDevice.objects.filter(hub=hub)
-        group_permission = GroupDevicePermission.objects.filter(device__in=devices)
+        if request.data is not None and len(request.data):
+            pass
+        else:
+            group_permission = GroupDevicePermission.objects.filter(device__in=devices)
         serializer = GroupDevicePermissionSerializer(group_permission, many=True)
         return Response(serializer.data)
 

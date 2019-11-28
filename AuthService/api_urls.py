@@ -45,9 +45,19 @@ api_url_patterns = [
         name = "api_device_user_list_permission"
     ),
     url(
+        r'^api/hubs/(?P<hub>\d+)/registred_devices/user_permissions/for_user/(?P<user>\d+)/$',
+        v.DeviceUserPermissionListView.as_view(),
+        name = "api_device_user_list_permission_for_user"
+    ),
+    url(
         r'^api/hubs/(?P<hub>\d+)/registred_devices/group_permissions/$',
         v.DeviceGroupPermissionListView.as_view(),
         name="api_device_group_list_permission"
+    ),
+    url(
+        r'^api/hubs/(?P<hub>\d+)/registred_devices/group_permissions/for_groups$',
+        v.DeviceGroupPermissionListView.as_view(),
+        name="api_device_group_list_permission_for_groups"
     ),
     url(r'api/get_me/$', v.GetMe.as_view(), name="api_get_me")
 ]
