@@ -63,3 +63,7 @@ class MeSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('pk', 'username', 'groups', 'is_staff')
+
+
+class GroupPksSerializer(serializers.Serializer):
+    pk = serializers.IntegerField()

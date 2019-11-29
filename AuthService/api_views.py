@@ -222,7 +222,9 @@ class DeviceGroupPermissionListView(APIView):
         hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
         devices = RegisteredDevice.objects.filter(hub=hub)
         if request.data is not None and len(request.data):
-            pass
+            serializer = GroupPksSerializer(request.data, many=True)
+            if serializer.is_valid():
+                group_permission = GroupDevicePermission.objects.filter(device__in=devices, group_pk__in=serializer.data)
         else:
             group_permission = GroupDevicePermission.objects.filter(device__in=devices)
         serializer = GroupDevicePermissionSerializer(group_permission, many=True)
