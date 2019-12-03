@@ -23,6 +23,14 @@ class APIVerifyUserToken(TokenVerifyView):
     pass
 
 
+class HubView(mixins.RetrieveModelMixin, generics.GenericAPIView):
+    queryset = Hub.objects.all()
+    serializer_class = HubSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+
 class HubListView(mixins.ListModelMixin, generics.GenericAPIView):
     queryset = Hub.objects.all()
     serializer_class = HubSerializer

@@ -9,6 +9,7 @@ api_url_patterns = [
     url(r'^api/user_auth/verify_token/$', v.APIVerifyUserToken.as_view(),
         name='api_user_verify_token'),
     url(r'^api/hubs/$', v.HubListView.as_view(), name='api_hubs'),
+    url(r'^api/hub/(?P<pk>\d+)/$', v.HubView.as_view(), name='api_hub_detail'),
     url(r'^api/hubs/validate_api_key/(?P<pk>\d+)/$',
         v.HubValidApiKeyView.as_view(), name='api_key_validate'),
     url(r'^api/hubs/register_device/$', v.RegisterDeviceAPIView.as_view(),

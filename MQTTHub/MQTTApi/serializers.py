@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from refactor.MQTTApi import Device
+from MQTTApi.models import Device
 
 
 class DeviceSerializer(serializers.ModelSerializer):

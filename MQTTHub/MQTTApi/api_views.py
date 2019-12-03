@@ -1,19 +1,21 @@
 import requests
 from django.http import Http404
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from MQTTHub.settings import AUTH_SERVICE_ADDRESS
+from MQTTHub.settings import AUTH_SERVICE_ADDRESS, HUB_ID
 from .models import Device
 from .serializers import DeviceSerializer
 
 
 class DevicesApiForUserView(APIView):
+
     def get_me(self):
         response = requests.get(
             AUTH_SERVICE_ADDRESS + "/api/get_me/",
             headers={
-                'Authorization': "Bearer " + self.request.COOKIES.get('user_token')
+                'Authorization': self.request.headers.get('Authorization')
             }
         )
 
@@ -25,7 +27,7 @@ class DevicesApiForUserView(APIView):
 
     def get_user_permissions(self, user_id):
         response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/hubs/%d/registred_devices/user_permissions/for_user/%d/" % (int(self.kwargs['hub']), user_id))
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%d/registred_devices/user_permissions/for_user/%d/" % (HUB_ID, user_id))
 
         if response.status_code != 200:
             raise Exception("Error in connection with AuthService: "
@@ -35,7 +37,7 @@ class DevicesApiForUserView(APIView):
 
     def get_group_permissions(self, group_ids):
         response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/hubs/%d/registred_devices/group_permissions/for_groups" % int(self.kwargs['hub']), json={"pk": group_ids})
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%d/registred_devices/group_permissions/for_groups" % HUB_ID, json={"pk": group_ids})
 
         if response.status_code != 200:
             raise Exception("Error in connection with AuthService: "
@@ -45,7 +47,7 @@ class DevicesApiForUserView(APIView):
 
     def get_device_user_permission(self, device_id):
         response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/hubs/%d/registred_devices/%d/user_permissions/" % (int(self.kwargs['hub']), device_id))
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%d/registred_devices/%d/user_permissions/" % (HUB_ID, device_id))
 
         if response.status_code != 200:
             raise Exception("Error in connection with AuthService: "
@@ -56,7 +58,7 @@ class DevicesApiForUserView(APIView):
     def get_device_group_permission(self, device_id):
         response = requests.get(
             AUTH_SERVICE_ADDRESS + "/api/hubs/%d/registred_devices/%d/group_permissions/" % (
-            int(self.kwargs['hub']), device_id))
+            HUB_ID, device_id))
 
         if response.status_code != 200:
             raise Exception("Error in connection with AuthService: "
@@ -64,10 +66,47 @@ class DevicesApiForUserView(APIView):
 
         return response.json()
 
+    def register_device(self, device):
+        response = requests.get(
+            AUTH_SERVICE_ADDRESS + "/api/hubs/register_device/",
+            json={
+                'hub': HUB_ID,
+                'device_id': device.pk
+            }
+        )
+
+        if response.status_code != 200:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+
     def get(self, request, pk=None, format=None):
         if pk is None:
             return self.get_all(request, format)
         return self.get_one(request, pk, format)
+
+    def post(self, request, format=None):
+        me = self.get_me()
+        if not me['is_staff']:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        serializer = DeviceSerializer(data=request.data, many=True)
+        if serializer.is_valid():
+            device = serializer.save()
+            self.register_device(device)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk, format=None):
+        me = self.get_me()
+        if not me['is_staff']:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        try:
+            device = Device.objects.get(pk=pk)
+        except Device.DoesNotExist:
+            raise Http404
+        serializer = DeviceSerializer(device, data=request.data, many=True)
+        if serializer.is_valid():
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get_all(self, request, format=None):
         me = self.get_me()

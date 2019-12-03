@@ -5,8 +5,8 @@ from rest_framework_api_key.models import AbstractAPIKey
 
 class Hub(models.Model):
     name = models.CharField(max_length=200, blank=True)
-    private_address = models.GenericIPAddressField()
-    public_address = models.GenericIPAddressField()
+    private_address = models.URLField(max_length=200)
+    public_address = models.URLField(max_length=200)
 
 
 class HubAPIKey(AbstractAPIKey):

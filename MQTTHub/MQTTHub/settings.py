@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'MQTTApi'
+    'MQTTApi',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -121,3 +122,16 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 AUTH_SERVICE_ADDRESS = "http://127.0.0.1:8000/authService"
+HUB_ID = 1
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+LOGIN_REDIRECT_URL = "/hub/dashboard/"
+
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000

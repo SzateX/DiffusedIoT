@@ -3,7 +3,7 @@ from django import forms
 import requests
 from django.urls import resolve, reverse
 
-from InzynierkaV2.settings import AUTH_SERVICE_ADDRESS
+from MQTTHub.settings import AUTH_SERVICE_ADDRESS
 
 
 class HubAuthorizationForm(forms.Form):

@@ -6,10 +6,9 @@ from django.shortcuts import resolve_url
 from django.utils.http import is_safe_url
 from django.views.generic import FormView, TemplateView
 
-from InzynierkaV2 import settings
-from InzynierkaV2.settings import AUTH_SERVICE_ADDRESS
-from MQTTHub.MQTTApi.forms import HubAuthorizationForm
-from refactor.MQTTApi import Device
+from MQTTHub import settings
+from MQTTHub.settings import AUTH_SERVICE_ADDRESS
+from MQTTApi.forms import HubAuthorizationForm
 
 
 class HubLoginRequiredMixin(AccessMixin):
@@ -103,11 +102,23 @@ class HubDeviceView(HubLoginRequiredMixin, TemplateView):
     template_name = 'MQTTApi/device.html'
     login_url = '/hub/login'
 
-    def get_me(self):
+    def get_hub(self, hub_id):
         response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/get_me/",
+            AUTH_SERVICE_ADDRESS + "/api/hub/%d/" % hub_id,
+        )
+
+        if response.status_code != 200:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+
+        return response.json()
+
+    def get_devices(self, hub):
+        response = requests.get(
+            hub['private_address'] + "/hub/internal_api/devices_for_user/",
             headers={
-                'Authorization': "Bearer " + self.request.COOKIES.get('user_token')
+                'Authorization': "Bearer " + self.request.COOKIES.get(
+                    'user_token')
             }
         )
 
@@ -117,38 +128,13 @@ class HubDeviceView(HubLoginRequiredMixin, TemplateView):
 
         return response.json()
 
-    def get_user_permissions(self):
-        response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/hubs/%d/registred_devices/user_permissions/" % int(self.kwargs['hub']))
-
-        if response.status_code != 200:
-            raise Exception("Error in connection with AuthService: "
-                            + response.text)
-
-        return response.json()
-
-    def get_group_permissions(self):
-        response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/hubs/%d/registred_devices/group_permissions/" % int(self.kwargs['hub']))
-
-        if response.status_code != 200:
-            raise Exception("Error in connection with AuthService: "
-                            + response.text)
-
-        return response.json()
-
     def get(self, request, *args, **kwargs):
-        me = self.get_me()
-        user_permissions = self.get_user_permissions()
-        group_permissions = self.get_group_permissions()
-        self.objects = self.get_objects(me, user_permissions, group_permissions)
+        hub = self.get_hub(int(kwargs.get('hub')))
+        self.devices = self.get_devices(hub)
         return super(HubDeviceView, self).get(request, *args, **kwargs)
 
-    def get_objects(self, me, user_permissions, group_permissions):
-        if me['is_staff']:
-            return Device.objects.all()
-        groups_pk = map(lambda group: group['pk'], me['groups'])
-        filtered_group_permissions = filter(lambda x: x['pk'] in groups_pk and x['read_permission'] == True, group_permissions)
-        filtered_user_permissions = filter(lambda x: x['pk'] == me['pk'] and x['read_permission'] == True, user_permissions)
-        devices_pk = set(map(lambda x: x['device'], filtered_group_permissions)).union(set(map(lambda x: x['device'], filtered_user_permissions)))
-        return Device.objects.filter(pk__in=devices_pk)
+    def get_context_data(self, **kwargs):
+        context = super(HubDeviceView, self).get_context_data(**kwargs)
+        context['devices'] = self.devices
+        return context
+

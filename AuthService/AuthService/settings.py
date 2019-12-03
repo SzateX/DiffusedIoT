@@ -131,3 +131,5 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
+
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000

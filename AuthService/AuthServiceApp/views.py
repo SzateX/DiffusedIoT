@@ -17,7 +17,7 @@ PERMISSION_DENIED_MESSAGE = 'Sorry, you need to have admin, to see this site.'
 
 class UserLoginView(LoginView):
     success_url = "/authService/dashboard"
-    template_name = "AuthService/templates/AuthService/login.html"
+    template_name = "AuthService/login.html"
 
 
 class UserLogoutView(LogoutView):
@@ -25,7 +25,7 @@ class UserLogoutView(LogoutView):
 
 
 class DashboardView(UserPassesTestMixin, TemplateView):
-    template_name = "AuthService/templates/AuthService/dashboard.html"
+    template_name = "AuthService/dashboard.html"
     login_url = LOGIN_URL
     permission_denied_message = PERMISSION_DENIED_MESSAGE
 
@@ -36,7 +36,7 @@ class DashboardView(UserPassesTestMixin, TemplateView):
 class UsersView(UserPassesTestMixin, ListView):
     login_url = LOGIN_URL
     permission_denied_message = PERMISSION_DENIED_MESSAGE
-    template_name = "AuthService/templates/AuthService/users.html"
+    template_name = "AuthService/users.html"
     context_object_name = "users"
     queryset = User.objects.all().exclude(username="AnonymousUser")
 
@@ -47,7 +47,7 @@ class UsersView(UserPassesTestMixin, ListView):
 class UserView(UserPassesTestMixin, DetailView):
     login_url = LOGIN_URL
     permission_denied_message = PERMISSION_DENIED_MESSAGE
-    template_name = "AuthService/users/templates/AuthService/users/detail.html"
+    template_name = "AuthService/users/detail.html"
     model = User
     context_object_name = 'user'
 
@@ -59,7 +59,7 @@ class UserCreateView(UserPassesTestMixin, CreateView):
     login_url = LOGIN_URL
     permission_denied_message = PERMISSION_DENIED_MESSAGE
     form_class = UserCreationForm
-    template_name = "AuthService/users/templates/AuthService/users/create.html"
+    template_name = "AuthService/users/create.html"
     success_url = "/authService/dashboard/users"
 
     def test_func(self):
@@ -71,7 +71,7 @@ class UserUpdateView(UserPassesTestMixin, UpdateView):
     permission_denied_message = PERMISSION_DENIED_MESSAGE
     form_class = UserChangeForm
     model = User
-    template_name = "AuthService/users/templates/AuthService/users/update.html"
+    template_name = "AuthService/users/update.html"
     success_url = "/authService/dashboard/users"
 
     def test_func(self):
@@ -81,7 +81,7 @@ class UserUpdateView(UserPassesTestMixin, UpdateView):
 class UserDeleteView(UserPassesTestMixin, DeleteView):
     login_url = LOGIN_URL
     permission_denied_message = PERMISSION_DENIED_MESSAGE
-    template_name = "AuthService/users/templates/AuthService/users/delete.html"
+    template_name = "AuthService/users/delete.html"
     model = User
     success_url = "/authService/dashboard/users"
 
@@ -92,7 +92,7 @@ class UserDeleteView(UserPassesTestMixin, DeleteView):
 class HubsView(UserPassesTestMixin, ListView):
     login_url = LOGIN_URL
     permission_denied_message = PERMISSION_DENIED_MESSAGE
-    template_name = "AuthService/templates/AuthService/hubs.html"
+    template_name = "AuthService/hubs.html"
     context_object_name = "hubs"
     model = Hub
 
@@ -117,7 +117,7 @@ class HubsView(UserPassesTestMixin, ListView):
 class HubView(UserPassesTestMixin, DetailView):
     login_url = LOGIN_URL
     permission_denied_message = PERMISSION_DENIED_MESSAGE
-    template_name = "AuthService/hubs/templates/AuthService/hubs/detail.html"
+    template_name = "AuthService/hubs/detail.html"
     context_object_name = "hub"
     model = Hub
 
@@ -128,7 +128,7 @@ class HubView(UserPassesTestMixin, DetailView):
 class HubCreateView(UserPassesTestMixin, CreateView):
     login_url = LOGIN_URL
     permission_denied_message = PERMISSION_DENIED_MESSAGE
-    template_name = "AuthService/hubs/templates/AuthService/hubs/create.html"
+    template_name = "AuthService/hubs/create.html"
     model = Hub
     success_url = "/authService/dashboard/hubs"
     fields = ['name', 'private_address', 'public_address']
@@ -145,7 +145,7 @@ class HubCreateView(UserPassesTestMixin, CreateView):
 class HubUpdateView(UserPassesTestMixin, UpdateView):
     login_url = LOGIN_URL
     permission_denied_message = PERMISSION_DENIED_MESSAGE
-    template_name = "AuthService/hubs/templates/AuthService/hubs/update.html"
+    template_name = "AuthService/hubs/update.html"
     model = Hub
     success_url = "/authService/dashboard/hubs"
     fields = ['name', 'private_address', 'public_address']
@@ -157,7 +157,7 @@ class HubUpdateView(UserPassesTestMixin, UpdateView):
 class HubDeleteView(UserPassesTestMixin, DeleteView):
     login_url = LOGIN_URL
     permission_denied_message = PERMISSION_DENIED_MESSAGE
-    template_name = "AuthService/hubs/templates/AuthService/hubs/delete.html"
+    template_name = "AuthService/hubs/delete.html"
     model = Hub
     success_url = "/authService/dashboard/hubs"
 
