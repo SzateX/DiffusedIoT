@@ -3,6 +3,7 @@ from django import forms
 import requests
 from django.urls import resolve, reverse
 
+from MQTTApi.models import Device
 from MQTTHub.settings import AUTH_SERVICE_ADDRESS
 
 
@@ -25,3 +26,8 @@ class HubAuthorizationForm(forms.Form):
 
         self.user_token = response.json().get("access")
         self.refresh_token = response.json().get("refresh")
+
+
+class HubDeviceForm(forms.Form):
+    name = forms.CharField()
+    type_of_device = forms.ChoiceField(choices=Device.TYPE_CHOICES)
