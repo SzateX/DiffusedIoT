@@ -67,7 +67,7 @@ class DevicesApiForUserView(APIView):
         return response.json()
 
     def register_device(self, device):
-        response = requests.get(
+        response = requests.post(
             AUTH_SERVICE_ADDRESS + "/api/hubs/register_device/",
             json={
                 'hub': HUB_ID,
@@ -75,7 +75,7 @@ class DevicesApiForUserView(APIView):
             }
         )
 
-        if response.status_code != 200:
+        if response.status_code not in [200, 201]:
             raise Exception("Error in connection with AuthService: "
                             + response.text)
 
@@ -88,7 +88,7 @@ class DevicesApiForUserView(APIView):
         me = self.get_me()
         if not me['is_staff']:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        serializer = DeviceSerializer(data=request.data, many=True)
+        serializer = DeviceSerializer(data=request.data)
         if serializer.is_valid():
             device = serializer.save()
             self.register_device(device)
@@ -103,9 +103,10 @@ class DevicesApiForUserView(APIView):
             device = Device.objects.get(pk=pk)
         except Device.DoesNotExist:
             raise Http404
-        serializer = DeviceSerializer(device, data=request.data, many=True)
+        serializer = DeviceSerializer(device, data=request.data)
         if serializer.is_valid():
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get_all(self, request, format=None):

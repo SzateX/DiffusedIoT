@@ -27,7 +27,7 @@ class HubLoginRequiredMixin(AccessMixin):
         response = requests.get(
             AUTH_SERVICE_ADDRESS + "/api/get_me/",
             headers={
-                'Authorization': token
+                'Authorization': "Bearer " + token
             }
         )
 
@@ -50,20 +50,46 @@ class HubLoginRequiredMixin(AccessMixin):
                                  self.get_redirect_field_name())
 
 
-class HubUserPassesTestMixin(HubLoginRequiredMixin):
+class HubUserPassesTestMixin(AccessMixin):
+    def verify_token(self, request):
+        response = requests.post(
+            AUTH_SERVICE_ADDRESS + "/api/user_auth/verify_token/",
+            json={
+                "token": request.COOKIES.get('user_token'),
+
+            })
+        if response.status_code != 200:
+            return False
+        return True
+
+    def get_me(self, token):
+        response = requests.get(
+            AUTH_SERVICE_ADDRESS + "/api/get_me/",
+            headers={
+                'Authorization': "Bearer " + token
+            }
+        )
+
+        if response.status_code != 200:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+
+        return response.json()
+
     def dispatch(self, request, *args, **kwargs):
         if not self.verify_token(request):
             return self.handle_no_permission()
         self.user = self.get_me(request.COOKIES.get('user_token'))
         if not self.test_func():
             return self.handle_no_permission()
-        return super(AccessMixin).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def test_func(self):
         raise NotImplementedError(
             '{0} is missing the implementation of the test_func() method.'.format(
                 self.__class__.__name__)
         )
+
 
 class HubLoginView(FormView):
     form_class = HubAuthorizationForm
@@ -178,10 +204,11 @@ class HubDeviceView(HubLoginRequiredMixin, TemplateView):
 class AddDeviceView(HubUserPassesTestMixin, FormView):
     form_class = HubDeviceForm
     template_name = 'MQTTApi/devices/add.html'
+    login_url = '/hub/login'
 
     def get_hub(self, hub_id):
         response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/hub/%d/" % hub_id,
+            AUTH_SERVICE_ADDRESS + "/api/hub/%d/" % int(hub_id),
         )
 
         if response.status_code != 200:
@@ -192,7 +219,7 @@ class AddDeviceView(HubUserPassesTestMixin, FormView):
 
     def register_device(self, form):
         response = requests.post(
-            self.get_hub(self.kwargs.get('hub'))['private_address'] + "internal_api/devices_for_user/",
+            self.get_hub(self.kwargs.get('hub'))['private_address'] + "/hub/internal_api/devices_for_user/",
             headers={
                 'Authorization': "Bearer " + self.request.COOKIES.get(
                     'user_token')
@@ -214,15 +241,19 @@ class AddDeviceView(HubUserPassesTestMixin, FormView):
     def test_func(self):
         return self.user['is_staff']
 
+    def get_success_url(self):
+        return '/hub/dashboard/hub/%d/' % int(self.kwargs.get('hub'))
+
 
 class UpdateDeviceView(HubUserPassesTestMixin, FormView):
     form_class = HubDeviceForm
     template_name = 'MQTTApi/devices/add.html'
+    login_url = '/hub/login/'
 
     def update(self, form):
         response = requests.put(
             self.get_hub(self.kwargs.get('hub'))[
-                'private_address'] + "internal_api/devices_for_user/%d/" % self.kwargs.get('pk'),
+                'private_address'] + "/hub/internal_api/devices_for_user/%d/" % int(self.kwargs.get('pk')),
             headers={
                 'Authorization': "Bearer " + self.request.COOKIES.get(
                     'user_token')
@@ -239,7 +270,7 @@ class UpdateDeviceView(HubUserPassesTestMixin, FormView):
 
     def get_hub(self, hub_id):
         response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/hub/%d/" % hub_id,
+            AUTH_SERVICE_ADDRESS + "/api/hub/%d/" % int(hub_id),
         )
 
         if response.status_code != 200:
@@ -252,7 +283,7 @@ class UpdateDeviceView(HubUserPassesTestMixin, FormView):
         hub = self.get_hub(hub_id)
 
         response = requests.get(
-            hub['private_address'] + "internal_api/devices_for_user/%d/" % device_id,
+            hub['private_address'] + "/hub/internal_api/devices_for_user/%d/" % int(device_id),
             headers={
                 'Authorization': "Bearer " + self.request.COOKIES.get(
                     'user_token')
@@ -277,3 +308,9 @@ class UpdateDeviceView(HubUserPassesTestMixin, FormView):
     def form_valid(self, form):
         self.update(form)
         return HttpResponseRedirect(self.get_success_url())
+
+    def test_func(self):
+        return self.user['is_staff']
+
+    def get_success_url(self):
+        return '/hub/dashboard/hub/%d/' % int(self.kwargs.get('hub'))

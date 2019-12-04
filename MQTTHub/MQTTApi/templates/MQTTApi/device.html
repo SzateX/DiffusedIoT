@@ -1,9 +1,11 @@
 <html>
     <head>
-        <title>Device</title>
+        <title>Devices</title>
     </head>
-
     <body>
-        Cisza
+        <a href="{% url 'hub_devices_add' hub %}">Dodaj urządzenie</a><br><br>
+        {% for device in devices %}
+            {{ device }} <a href="{% url 'hub_devices_update' hub device.pk %}">Edytuj urządzenie</a><br>
+        {% endfor %}
     </body>
 </html>

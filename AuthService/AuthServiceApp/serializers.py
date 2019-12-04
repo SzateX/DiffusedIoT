@@ -22,6 +22,9 @@ class RegisterDeviceSerializer(serializers.Serializer):
     hub = serializers.PrimaryKeyRelatedField(queryset=Hub.objects)
     device_id = serializers.IntegerField()
 
+    def create(self, validated_data):
+        return RegisteredDevice.objects.create(**validated_data)
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
