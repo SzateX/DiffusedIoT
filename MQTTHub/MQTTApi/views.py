@@ -6,42 +6,17 @@ from django.shortcuts import resolve_url
 from django.utils.http import is_safe_url
 from django.views.generic import FormView, TemplateView
 
+from MQTTApi.services import AuthServiceApi, InternalApi
 from MQTTHub import settings
 from MQTTHub.settings import AUTH_SERVICE_ADDRESS
 from MQTTApi.forms import HubAuthorizationForm, HubDeviceForm
 
 
 class HubLoginRequiredMixin(AccessMixin):
-    def verify_token(self, request):
-        response = requests.post(
-            AUTH_SERVICE_ADDRESS + "/api/user_auth/verify_token/",
-            json={
-                "token": request.COOKIES.get('user_token'),
-
-            })
-        if response.status_code != 200:
-            return False
-        return True
-
-    def get_me(self, token):
-        response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/get_me/",
-            headers={
-                'Authorization': "Bearer " + token
-            }
-        )
-
-        if response.status_code != 200:
-            raise Exception("Error in connection with AuthService: "
-                            + response.text)
-
-        return response.json()
-
-
     def dispatch(self, request, *args, **kwargs):
-        if not self.verify_token(request):
+        if not AuthServiceApi.verify_token(request):
             return self.handle_no_permission()
-        self.user = self.get_me(request.COOKIES.get('user_token'))
+        self.user = AuthServiceApi.get_me(request.COOKIES.get('user_token'))
         return super().dispatch(request, *args, **kwargs)
 
     def handle_no_permission(self):
@@ -51,35 +26,10 @@ class HubLoginRequiredMixin(AccessMixin):
 
 
 class HubUserPassesTestMixin(AccessMixin):
-    def verify_token(self, request):
-        response = requests.post(
-            AUTH_SERVICE_ADDRESS + "/api/user_auth/verify_token/",
-            json={
-                "token": request.COOKIES.get('user_token'),
-
-            })
-        if response.status_code != 200:
-            return False
-        return True
-
-    def get_me(self, token):
-        response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/get_me/",
-            headers={
-                'Authorization': "Bearer " + token
-            }
-        )
-
-        if response.status_code != 200:
-            raise Exception("Error in connection with AuthService: "
-                            + response.text)
-
-        return response.json()
-
     def dispatch(self, request, *args, **kwargs):
-        if not self.verify_token(request):
+        if not AuthServiceApi.verify_token(request):
             return self.handle_no_permission()
-        self.user = self.get_me(request.COOKIES.get('user_token'))
+        self.user = AuthServiceApi.get_me(request.COOKIES.get('user_token'))
         if not self.test_func():
             return self.handle_no_permission()
         return super().dispatch(request, *args, **kwargs)
@@ -139,18 +89,8 @@ class HubDashboard(HubLoginRequiredMixin, TemplateView):
     template_name = 'MQTTApi/dashboard.html'
     login_url = '/hub/login'
 
-    def get_hubs(self):
-        response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/hubs/")
-
-        if response.status_code != 200:
-            raise Exception("Error in connection with AuthService: "
-                            + response.content)
-
-        return response.json()
-
     def get(self, request, *args, **kwargs):
-        self.hubs = self.get_hubs()
+        self.hubs = AuthServiceApi.get_hubs()
         return super(HubDashboard, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -164,35 +104,9 @@ class HubDeviceView(HubLoginRequiredMixin, TemplateView):
     template_name = 'MQTTApi/device.html'
     login_url = '/hub/login'
 
-    def get_hub(self, hub_id):
-        response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/hub/%d/" % hub_id,
-        )
-
-        if response.status_code != 200:
-            raise Exception("Error in connection with AuthService: "
-                            + response.text)
-
-        return response.json()
-
-    def get_devices(self, hub):
-        response = requests.get(
-            hub['private_address'] + "/hub/internal_api/devices_for_user/",
-            headers={
-                'Authorization': "Bearer " + self.request.COOKIES.get(
-                    'user_token')
-            }
-        )
-
-        if response.status_code != 200:
-            raise Exception("Error in connection with AuthService: "
-                            + response.text)
-
-        return response.json()
-
     def get(self, request, *args, **kwargs):
-        hub = self.get_hub(int(kwargs.get('hub')))
-        self.devices = self.get_devices(hub)
+        hub = AuthServiceApi.get_hub(int(kwargs.get('hub')))
+        self.devices = AuthServiceApi.get_devices(self.request.COOKIES.get('user_token'), hub)
         return super(HubDeviceView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -206,36 +120,11 @@ class AddDeviceView(HubUserPassesTestMixin, FormView):
     template_name = 'MQTTApi/devices/add.html'
     login_url = '/hub/login'
 
-    def get_hub(self, hub_id):
-        response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/hub/%d/" % int(hub_id),
-        )
-
-        if response.status_code != 200:
-            raise Exception("Error in connection with AuthService: "
-                            + response.text)
-
-        return response.json()
-
-    def register_device(self, form):
-        response = requests.post(
-            self.get_hub(self.kwargs.get('hub'))['private_address'] + "/hub/internal_api/devices_for_user/",
-            headers={
-                'Authorization': "Bearer " + self.request.COOKIES.get(
-                    'user_token')
-            },
-            json={
-                'name':  form.cleaned_data['name'],
-                'type_of_device':  form.cleaned_data['type_of_device']
-            }
-        )
-
-        if response.status_code not in [200, 201]:
-            raise Exception("Error in connection with AuthService: "
-                            + response.text)
-
     def form_valid(self, form):
-        self.register_device(form)
+        hub = AuthServiceApi.get_hub(self.kwargs.get('hub'))
+        token = self.request.COOKIES.get(
+                    'user_token')
+        InternalApi.save_device(token, hub, form)
         return HttpResponseRedirect(self.get_success_url())
 
     def test_func(self):
@@ -250,63 +139,22 @@ class UpdateDeviceView(HubUserPassesTestMixin, FormView):
     template_name = 'MQTTApi/devices/add.html'
     login_url = '/hub/login/'
 
-    def update(self, form):
-        response = requests.put(
-            self.get_hub(self.kwargs.get('hub'))[
-                'private_address'] + "/hub/internal_api/devices_for_user/%d/" % int(self.kwargs.get('pk')),
-            headers={
-                'Authorization': "Bearer " + self.request.COOKIES.get(
-                    'user_token')
-            },
-            json={
-                'name': form.cleaned_data['name'],
-                'type_of_device': form.cleaned_data['type_of_device']
-            }
-        )
-
-        if response.status_code not in [200, 201]:
-            raise Exception("Error in connection with AuthService: "
-                            + response.text)
-
-    def get_hub(self, hub_id):
-        response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/hub/%d/" % int(hub_id),
-        )
-
-        if response.status_code != 200:
-            raise Exception("Error in connection with AuthService: "
-                            + response.text)
-
-        return response.json()
-
-    def get_object(self, hub_id, device_id):
-        hub = self.get_hub(hub_id)
-
-        response = requests.get(
-            hub['private_address'] + "/hub/internal_api/devices_for_user/%d/" % int(device_id),
-            headers={
-                'Authorization': "Bearer " + self.request.COOKIES.get(
-                    'user_token')
-            },
-        )
-
-        if response.status_code not in [200]:
-            raise Exception("Error in connection with AuthService: "
-                            + response.text)
-
-        return response.json()
-
     def get_context_data(self, **kwargs):
         context = super(UpdateDeviceView, self).get_context_data(**kwargs)
         context['form'] = self.get_form_class()(initial=self.object)
         return context
 
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object(kwargs['hub'], kwargs['pk'])
+        token = self.request.COOKIES.get('user_token')
+        hub = AuthServiceApi.get_hub(kwargs['hub'])
+        self.object = InternalApi.get_device(token, hub, kwargs['pk'])
         return super(UpdateDeviceView, self).get(request, *args, **kwargs)
 
     def form_valid(self, form):
-        self.update(form)
+        token = self.request.COOKIES.get('user_token')
+        hub = AuthServiceApi.get_hub(self.kwargs['hub'])
+        device_id = int(self.kwargs.get('pk'))
+        InternalApi.update_device(token, hub, device_id, form)
         return HttpResponseRedirect(self.get_success_url())
 
     def test_func(self):
