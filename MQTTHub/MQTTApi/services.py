@@ -98,7 +98,7 @@ class InternalApi(object):
             },
         )
         if response.status_code not in [200]:
-            raise Exception("Error in connection with AuthService: "
+            raise Exception("Error in connection with InternalApi: "
                             + response.text)
         return response.json()
 
@@ -115,5 +115,5 @@ class InternalApi(object):
             }
         )
         if response.status_code not in [200, 201]:
-            raise Exception("Error in connection with AuthService: "
+            raise Exception("Error in connection with InternalApi: "
                             + response.text)
