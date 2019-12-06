@@ -165,6 +165,9 @@ class UpdateDeviceView(HubUserPassesTestMixin, FormView):
 
 
 class DevicePermissionsView(HubUserPassesTestMixin, TemplateView):
+    template_name = "MQTTApi/permissions/list.html"
+    login_url = '/hub/login'
+
     def test_func(self):
         return self.user['is_staff']
 
@@ -192,14 +195,16 @@ class DevicePermissionsView(HubUserPassesTestMixin, TemplateView):
         token = self.request.COOKIES.get('user_token')
         hub = AuthServiceApi.get_hub(kwargs['hub'])
         device = InternalApi.get_device(token, hub, kwargs['pk'])
+        self.device = device
         self.users = AuthServiceApi.get_users()
         self.groups = AuthServiceApi.get_groups()
-        self.user_permissions = AuthServiceApi.get_user_permissions(hub['pk'], device['pk'])
-        self.group_permissions = AuthServiceApi.get_group_permissions(hub['pk'], device['pk'])
+        self.user_permissions = AuthServiceApi.get_device_user_permission(hub['pk'], device['pk'])
+        self.group_permissions = AuthServiceApi.get_device_group_permission(hub['pk'], device['pk'])
         return super(DevicePermissionsView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(DevicePermissionsView, self).get_context_data(**kwargs)
         context['user_permissions'] = self.convert_users_to_usernames(self.user_permissions, self.user)
         context['group_permissions'] = self.convert_gropus_to_groupnames(self.group_permissions, self.groups)
+        context['device'] = self.device
         return context

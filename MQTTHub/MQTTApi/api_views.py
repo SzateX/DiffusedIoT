@@ -42,7 +42,7 @@ class DevicesApiForUserView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get_all(self, request, format=None):
-        me = AuthServiceApi.get_me(self.request.headers.get('Authorization'))
+        me = AuthServiceApi.get_me(request.headers.get('Authorization'))
         if me['is_staff']:
             devices = Device.objects.all()
         else:

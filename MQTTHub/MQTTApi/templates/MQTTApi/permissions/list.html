@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rules List</title>
+</head>
+<body>
+    {{device}}<br><br>
+    User rules:<br>
+    {% for user_perm in user_permissions %}
+        {{user_perm}}
+    {% endfor %}
+    <br><br>
+    Group rules:<br>
+    {% for group_perm in group_permissions %}
+        {{group_perm}}
+    {% endfor %}
+</body>
+</html>
