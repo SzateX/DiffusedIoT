@@ -71,6 +71,85 @@ class AuthServiceApi(object):
             raise forms.ValidationError(response.json().get('detail'))
         return response
 
+    @staticmethod
+    def get_users():
+        response = requests.get(
+            AUTH_SERVICE_ADDRESS + "/api/users/"
+        )
+        if response.status_code != 200:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+        return response.json()
+
+    @staticmethod
+    def get_groups():
+        response = requests.get(
+            AUTH_SERVICE_ADDRESS + "/api/groups/"
+        )
+        if response.status_code != 200:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+        return response.json()
+
+    @staticmethod
+    def get_user_permissions(hub_id, user_id):
+        response = requests.get(
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%d/registred_devices/user_permissions/for_user/%d/" % (hub_id, user_id))
+
+        if response.status_code != 200:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+
+        return response.json()
+
+    @staticmethod
+    def get_group_permissions(hub_id, group_ids):
+        response = requests.get(
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%d/registred_devices/group_permissions/for_groups" % hub_id, json={"pk": group_ids})
+
+        if response.status_code != 200:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+
+        return response.json()
+
+    @staticmethod
+    def get_device_user_permission(hub_id, device_id):
+        response = requests.get(
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%d/registred_devices/%d/user_permissions/" % (hub_id, device_id))
+
+        if response.status_code != 200:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+
+        return response.json()
+
+    @staticmethod
+    def get_device_group_permission(hub_id, device_id):
+        response = requests.get(
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%d/registred_devices/%d/group_permissions/" % (
+            hub_id, device_id))
+
+        if response.status_code != 200:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+
+        return response.json()
+
+    @staticmethod
+    def register_device(hub_id, device):
+        response = requests.post(
+            AUTH_SERVICE_ADDRESS + "/api/hubs/register_device/",
+            json={
+                'hub': hub_id,
+                'device_id': device.pk
+            }
+        )
+
+        if response.status_code not in [200, 201]:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+
 
 class InternalApi(object):
     @staticmethod
@@ -117,3 +196,4 @@ class InternalApi(object):
         if response.status_code not in [200, 201]:
             raise Exception("Error in connection with InternalApi: "
                             + response.text)
+

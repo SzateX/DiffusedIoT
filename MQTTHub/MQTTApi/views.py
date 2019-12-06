@@ -162,3 +162,44 @@ class UpdateDeviceView(HubUserPassesTestMixin, FormView):
 
     def get_success_url(self):
         return '/hub/dashboard/hub/%d/' % int(self.kwargs.get('hub'))
+
+
+class DevicePermissionsView(HubUserPassesTestMixin, TemplateView):
+    def test_func(self):
+        return self.user['is_staff']
+
+    def convert_users_to_usernames(self, permissions, users):
+        perms = []
+        for permission in permissions:
+            for user in users:
+                if user['pk'] == permission['user']:
+                    permission['user'] = user
+                    perms.append(permission)
+                    break
+        return perms
+
+    def convert_gropus_to_groupnames(self, permissions, groups):
+        perms = []
+        for permission in permissions:
+            for group in groups:
+                if group['pk'] == permission['group']:
+                    permission['user'] = group
+                    perms.append(permission)
+                    break
+        return perms
+
+    def get(self, request, *args, **kwargs):
+        token = self.request.COOKIES.get('user_token')
+        hub = AuthServiceApi.get_hub(kwargs['hub'])
+        device = InternalApi.get_device(token, hub, kwargs['pk'])
+        self.users = AuthServiceApi.get_users()
+        self.groups = AuthServiceApi.get_groups()
+        self.user_permissions = AuthServiceApi.get_user_permissions(hub['pk'], device['pk'])
+        self.group_permissions = AuthServiceApi.get_group_permissions(hub['pk'], device['pk'])
+        return super(DevicePermissionsView, self).get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(DevicePermissionsView, self).get_context_data(**kwargs)
+        context['user_permissions'] = self.convert_users_to_usernames(self.user_permissions, self.user)
+        context['group_permissions'] = self.convert_gropus_to_groupnames(self.group_permissions, self.groups)
+        return context
