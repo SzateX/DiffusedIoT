@@ -9,7 +9,8 @@ from django.views.generic import FormView, TemplateView
 from MQTTApi.services import AuthServiceApi, InternalApi
 from MQTTHub import settings
 from MQTTHub.settings import AUTH_SERVICE_ADDRESS
-from MQTTApi.forms import HubAuthorizationForm, HubDeviceForm
+from MQTTApi.forms import HubAuthorizationForm, HubDeviceForm, \
+    UserPermissionForm, GroupPermissionForm
 
 
 class HubLoginRequiredMixin(AccessMixin):
@@ -207,4 +208,48 @@ class DevicePermissionsView(HubUserPassesTestMixin, TemplateView):
         context['user_permissions'] = self.convert_users_to_usernames(self.user_permissions, self.user)
         context['group_permissions'] = self.convert_gropus_to_groupnames(self.group_permissions, self.groups)
         context['device'] = self.device
+        return context
+
+
+class AddDeviceUserPermissionView(HubUserPassesTestMixin, FormView):
+    form_class = UserPermissionForm
+    template_name = 'MQTTApi/permissions/add.html'
+    login_url = '/hub/login/'
+
+    def test_func(self):
+        return self.user['is_staff']
+    
+    def get(self, request, *args, **kwargs):
+        self.users = AuthServiceApi.get_users()
+        return super(AddDeviceUserPermissionView, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.users = AuthServiceApi.get_users()
+        return super(AddDeviceUserPermissionView, self).post(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(AddDeviceUserPermissionView, self).get_context_data(**kwargs)
+        context['form'] = self.get_form_class()(user_list=self.users)
+        return context
+        
+
+class AddDeviceGroupPermissionView(HubUserPassesTestMixin, FormView):
+    form_class = GroupPermissionForm
+    template_name = 'MQTTApi/permissions/add.html'
+    login_url = '/hub/login/'
+
+    def test_func(self):
+        return self.user['is_staff']
+
+    def get(self, request, *args, **kwargs):
+        self.groups = AuthServiceApi.get_groups()
+        return super(AddDeviceGroupPermissionView, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.groups = AuthServiceApi.get_users()
+        return super(AddDeviceGroupPermissionView, self).post(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(AddDeviceGroupPermissionView, self).get_context_data(**kwargs)
+        context['form'] = self.get_form_class()(group_list=self.groups)
         return context
