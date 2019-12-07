@@ -6,14 +6,14 @@
 </head>
 <body>
     {{device}}<br><br>
-    User rules:<br>
+    User rules <a href="{% url 'add_user_permission' hub device.pk %}">Add Rule</a>:<br>
     {% for user_perm in user_permissions %}
-        {{user_perm}}
+        {{user_perm}}<br>
     {% endfor %}
     <br><br>
-    Group rules:<br>
+    Group rules <a href="{% url 'add_group_permission' hub device.pk %}">Add Rule</a>:<br>
     {% for group_perm in group_permissions %}
-        {{group_perm}}
+        {{group_perm}}<br>
     {% endfor %}
 </body>
 </html>

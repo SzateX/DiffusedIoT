@@ -176,6 +176,8 @@ class DevicePermissionsView(HubUserPassesTestMixin, TemplateView):
         perms = []
         for permission in permissions:
             for user in users:
+                print(permission)
+                print(user)
                 if user['pk'] == permission['user']:
                     permission['user'] = user
                     perms.append(permission)
@@ -205,7 +207,7 @@ class DevicePermissionsView(HubUserPassesTestMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(DevicePermissionsView, self).get_context_data(**kwargs)
-        context['user_permissions'] = self.convert_users_to_usernames(self.user_permissions, self.user)
+        context['user_permissions'] = self.convert_users_to_usernames(self.user_permissions, self.users)
         context['group_permissions'] = self.convert_gropus_to_groupnames(self.group_permissions, self.groups)
         context['device'] = self.device
         return context
@@ -229,8 +231,29 @@ class AddDeviceUserPermissionView(HubUserPassesTestMixin, FormView):
 
     def get_context_data(self, **kwargs):
         context = super(AddDeviceUserPermissionView, self).get_context_data(**kwargs)
-        context['form'] = self.get_form_class()(user_list=self.users)
+        # context['form'] = self.get_form_class()(user_list=self.users)
         return context
+
+    def get_form(self, form_class=None):
+        if form_class is None:
+            form_class = self.get_form_class()
+        return form_class(self.users, **self.get_form_kwargs())
+
+    def form_valid(self, form):
+        hub = AuthServiceApi.get_hub(self.kwargs['hub'])
+        device_id = int(self.kwargs.get('pk'))
+        form.cleaned_data['user'] = int(form.cleaned_data['user'])
+        form.cleaned_data['device'] = device_id
+        AuthServiceApi.add_device_user_permission(hub['pk'], device_id, form.cleaned_data)
+        return HttpResponseRedirect(self.get_success_url())
+    
+    def form_invalid(self, form):
+        print("DUPA")
+        print(form.errors)
+        return super(AddDeviceUserPermissionView, self).form_invalid(form)
+
+    def get_success_url(self):
+        return 'dashboard/hub/%s/device/%s/permissions/' % (self.kwargs.get('hub'), self.kwargs.get('device'))
         
 
 class AddDeviceGroupPermissionView(HubUserPassesTestMixin, FormView):
@@ -251,5 +274,21 @@ class AddDeviceGroupPermissionView(HubUserPassesTestMixin, FormView):
 
     def get_context_data(self, **kwargs):
         context = super(AddDeviceGroupPermissionView, self).get_context_data(**kwargs)
-        context['form'] = self.get_form_class()(group_list=self.groups)
+        # context['form'] = self.get_form_class()(group_list=self.groups)
         return context
+
+    def form_valid(self, form):
+        hub = AuthServiceApi.get_hub(self.kwargs['hub'])
+        device_id = int(self.kwargs.get('pk'))
+        form.cleaned_data['group'] = int(form.cleaned_data['group'])
+        form.cleaned_data['device'] = device_id
+        AuthServiceApi.add_device_group_permission(hub, device_id, form.cleaned_data)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return 'dashboard/hub/%s/device/%s/permissions/' % (self.kwargs.get('hub'), self.kwargs.get('device'))
+
+    def get_form(self, form_class=None):
+        if form_class is None:
+            form_class = self.get_form_class()
+        return form_class(self.groups, **self.get_form_kwargs())

@@ -118,7 +118,7 @@ class DeviceUserPermissionsView(APIView):
     def get(self, request, hub, device, pk=None, format=None):
         hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
         device = self.get_object(RegisteredDevice, hub=hub,
-                                 pk=self.kwargs.get("device"))
+                                 device_id=self.kwargs.get("device"))
         if pk is None:
             obj = UserDevicePermission.objects.filter(device=device)
         else:
@@ -126,13 +126,13 @@ class DeviceUserPermissionsView(APIView):
         serializer = UserDevicePermissionSerializer(obj, many=pk is None)
         return Response(serializer.data)
 
-    def post(self, request, format=None):
+    def post(self, request, hub, device, format=None):
         hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
         device = self.get_object(RegisteredDevice, hub=hub,
-                                 pk=self.kwargs.get("device"))
-        serializer = UserDevicePermissionSerializer(request.data)
+                                 device_id=self.kwargs.get("device"))
+        serializer = UserDevicePermissionSerializer(data=request.data, hub=hub)
         if serializer.is_valid():
-            if device.pk != serializer.data.get("device"):
+            if device.pk != serializer.validated_data.get("device").pk:
                 return Response(serializer.errors,
                                 status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
@@ -142,9 +142,9 @@ class DeviceUserPermissionsView(APIView):
     def put(self, request, pk, format=None):
         hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
         device = self.get_object(RegisteredDevice, hub=hub,
-                                 pk=self.kwargs.get("device"))
+                                 device_id=self.kwargs.get("device"))
         obj = self.get_object(UserDevicePermission, device=device, pk=pk)
-        serializer = UserDevicePermissionSerializer(obj, request.data)
+        serializer = UserDevicePermissionSerializer(obj, request.data, hub=hub)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -153,7 +153,7 @@ class DeviceUserPermissionsView(APIView):
     def delete(self, request, pk, format=None):
         hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
         device = self.get_object(RegisteredDevice, hub=hub,
-                                 pk=self.kwargs.get("device"))
+                                 device_id=self.kwargs.get("device"))
         obj = self.get_object(UserDevicePermission, device=device, pk=pk)
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -169,7 +169,7 @@ class DeviceGroupPermissionsView(APIView):
     def get(self, request, hub, device, pk=None, format=None):
         hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
         device = self.get_object(RegisteredDevice, hub=hub,
-                                 pk=self.kwargs.get("device"))
+                                 device_id=self.kwargs.get("device"))
         if pk is None:
             obj = GroupDevicePermission.objects.filter(device=device)
         else:
@@ -180,10 +180,10 @@ class DeviceGroupPermissionsView(APIView):
     def post(self, request, format=None):
         hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
         device = self.get_object(RegisteredDevice, hub=hub,
-                                 pk=self.kwargs.get("device"))
-        serializer = GroupDevicePermissionSerializer(request.data)
+                                 device_id=self.kwargs.get("device"))
+        serializer = GroupDevicePermissionSerializer(data=request.data, hub=hub)
         if serializer.is_valid():
-            if device.pk != serializer.data.get("device"):
+            if device.pk != serializer.validated_data.get("device").pk:
                 return Response(serializer.errors,
                                 status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
@@ -193,9 +193,9 @@ class DeviceGroupPermissionsView(APIView):
     def put(self, request, pk, format=None):
         hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
         device = self.get_object(RegisteredDevice, hub=hub,
-                                 pk=self.kwargs.get("device"))
+                                 device_id=self.kwargs.get("device"))
         obj = self.get_object(GroupDevicePermission, device=device, pk=pk)
-        serializer = GroupDevicePermissionSerializer(obj, request.data)
+        serializer = GroupDevicePermissionSerializer(obj, request.data, hub=hub)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -204,7 +204,7 @@ class DeviceGroupPermissionsView(APIView):
     def delete(self, request, pk, format=None):
         hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
         device = self.get_object(RegisteredDevice, hub=hub,
-                                 pk=self.kwargs.get("device"))
+                                 device_id=self.kwargs.get("device"))
         obj = self.get_object(GroupDevicePermission, device=device, pk=pk)
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -222,10 +222,10 @@ class DeviceUserPermissionListView(APIView):
         devices = RegisteredDevice.objects.filter(hub=hub)
         if user != None:
             user_permission = UserDevicePermission.objects.filter(
-                device__in=devices, user_id=user)
+                device_id__in=devices, user_id=user)
         else:
             user_permission = UserDevicePermission.objects.filter(
-                device__in=devices)
+                device_id__in=devices)
         serializer = UserDevicePermissionSerializer(user_permission, many=True)
         return Response(serializer.data)
 
@@ -245,13 +245,13 @@ class DeviceGroupPermissionListView(APIView):
             serializer = GroupPksSerializer(data=request.data, many=True)
             if serializer.is_valid():
                 group_permission = GroupDevicePermission.objects.filter(
-                    device__in=devices, group_pk__in=serializer.data)
+                    device_id__in=devices, group_pk__in=serializer.data)
             else:
                 return Response(serializer.errors,
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
             group_permission = GroupDevicePermission.objects.filter(
-                device__in=devices)
+                device_id__in=devices)
         serializer = GroupDevicePermissionSerializer(group_permission,
                                                      many=True)
         return Response(serializer.data)

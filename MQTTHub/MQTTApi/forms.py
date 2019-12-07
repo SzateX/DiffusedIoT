@@ -32,21 +32,23 @@ class HubDeviceForm(forms.Form):
 
 
 class UserPermissionForm(forms.Form):
-    read = forms.BooleanField()
-    write = forms.BooleanField()
+    read_permission = forms.BooleanField()
+    write_permission = forms.BooleanField()
+    user = forms.TypedChoiceField(coerce=int)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, user_list=None, *args, **kwargs):
         super(UserPermissionForm, self).__init__(*args, **kwargs)
-        if 'user_list' in kwargs:
-            self.fields['user'] = forms.ChoiceField(choices=((user['pk'], user['username']) for user in kwargs['user_list']))
+        if user_list:
+            # self.fields['user'] = forms.ChoiceField(choices=((user['pk'], user['username']) for user in user_list))
+            self.fields['user'].choices = ((int(user['pk']), user['username']) for user in user_list)
 
 
 class GroupPermissionForm(forms.Form):
     read = forms.BooleanField()
     write = forms.BooleanField()
+    groups = forms.TypedChoiceField(coerce=int)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, group_list=None, *args, **kwargs):
         super(GroupPermissionForm, self).__init__(*args, **kwargs)
-        if 'group_list' in kwargs:
-            self.fields['group'] = forms.ChoiceField(
-                choices=((group['pk'], group['name']) for group in kwargs['group_list']))
+        if group_list:
+            self.fields['group'].choices = ((int(group['pk']), group['name']) for group in group_list)
