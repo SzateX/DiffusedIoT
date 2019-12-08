@@ -139,7 +139,7 @@ class DeviceUserPermissionsView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request, pk, format=None):
+    def put(self, request, hub, device, pk, format=None):
         hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
         device = self.get_object(RegisteredDevice, hub=hub,
                                  device_id=self.kwargs.get("device"))
@@ -177,7 +177,7 @@ class DeviceGroupPermissionsView(APIView):
         serializer = GroupDevicePermissionSerializer(obj, many=pk is None)
         return Response(serializer.data)
 
-    def post(self, request, format=None):
+    def post(self, request, hub, device, format=None):
         hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
         device = self.get_object(RegisteredDevice, hub=hub,
                                  device_id=self.kwargs.get("device"))
@@ -190,7 +190,7 @@ class DeviceGroupPermissionsView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request, pk, format=None):
+    def put(self, request, hub, device, pk, format=None):
         hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
         device = self.get_object(RegisteredDevice, hub=hub,
                                  device_id=self.kwargs.get("device"))

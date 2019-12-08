@@ -12,4 +12,6 @@ urlpatterns = [
     url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<pk>\d+)/permissions/$', v.DevicePermissionsView.as_view(), name='hub_device_permissions'),
     url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<pk>\d+)/permissions/add_user/$', v.AddDeviceUserPermissionView.as_view(), name='add_user_permission'),
     url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<pk>\d+)/permissions/add_group/$', v.AddDeviceGroupPermissionView.as_view(), name='add_group_permission'),
+    url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<device>\d+)/permissions/user/(?P<pk>\d+)/$', v.UpdateDeviceUserPermissionView.as_view(), name='update_user_permission'),
+    url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<device>\d+)/permissions/group/(?P<pk>\d+)/$', v.UpdateDeviceGroupPermissionView.as_view(), name='update_group_permission'),
 ] + api_urls.urlpatterns

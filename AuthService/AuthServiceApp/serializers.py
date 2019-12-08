@@ -67,7 +67,7 @@ class GroupDevicePermissionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GroupDevicePermission
-        fields = ('pk', 'device', 'user', 'read_permission', 'write_permission')
+        fields = ('pk', 'device', 'group', 'read_permission', 'write_permission')
 
     def __init__(self, instance=None, data=empty, **kwargs):
         hub = None
@@ -76,10 +76,6 @@ class GroupDevicePermissionSerializer(serializers.ModelSerializer):
         super(GroupDevicePermissionSerializer, self).__init__(instance, data, **kwargs)
         if hub is not None:
             self.fields['device'].queryset = RegisteredDevice.objects.filter(hub=hub)
-
-    class Meta:
-        model = UserDevicePermission
-        fields = ('pk', 'device', 'user', 'read_permission', 'write_permission')
 
 
 class MeSerializer(serializers.ModelSerializer):

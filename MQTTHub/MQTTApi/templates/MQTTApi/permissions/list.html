@@ -8,7 +8,7 @@
     {{device}}<br><br>
     User rules <a href="{% url 'add_user_permission' hub device.pk %}">Add Rule</a>:<br>
     {% for user_perm in user_permissions %}
-        {{user_perm}}<br>
+        {{user_perm}} <a href="{% url 'update_user_permission' hub device.pk user_perm.pk %}">Edit</a><br>
     {% endfor %}
     <br><br>
     Group rules <a href="{% url 'add_group_permission' hub device.pk %}">Add Rule</a>:<br>

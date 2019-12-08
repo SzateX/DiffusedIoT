@@ -112,7 +112,7 @@ class AuthServiceApi(object):
         return response.json()
 
     @staticmethod
-    def get_device_user_permission(hub_id, device_id):
+    def get_device_user_permissions(hub_id, device_id):
         response = requests.get(
             AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/user_permissions/" % (hub_id, device_id))
         if response.status_code != 200:
@@ -121,10 +121,30 @@ class AuthServiceApi(object):
         return response.json()
 
     @staticmethod
-    def get_device_group_permission(hub_id, device_id):
+    def get_device_group_permissions(hub_id, device_id):
         response = requests.get(
             AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/group_permissions/" % (
             hub_id, device_id))
+        if response.status_code != 200:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+        return response.json()
+
+    @staticmethod
+    def get_device_user_permission(hub_id, device_id, permission_id):
+        response = requests.get(
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/user_permissions/%s" % (
+            hub_id, device_id, permission_id))
+        if response.status_code != 200:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+        return response.json()
+
+    @staticmethod
+    def get_device_group_permission(hub_id, device_id, permission_id):
+        response = requests.get(
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/group_permissions/%s" % (
+                hub_id, device_id, permission_id))
         if response.status_code != 200:
             raise Exception("Error in connection with AuthService: "
                             + response.text)
@@ -150,7 +170,31 @@ class AuthServiceApi(object):
                 hub_id, device_id),
             json=permission_obj
         )
-        if response.status_code != 201:
+        if response.status_code in [200, 201]:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+        return response.json()
+
+    @staticmethod
+    def update_device_user_permission(hub_id, device_id, permission_id, permission_obj):
+        response = requests.put(
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/user_permissions/%s/" % (
+                hub_id, device_id, permission_id),
+            json=permission_obj
+        )
+        if response.status_code != 200:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+        return response.json()
+
+    @staticmethod
+    def update_device_group_permission(hub_id, device_id, permission_id, permission_obj):
+        response = requests.put(
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/group_permissions/%s/" % (
+                hub_id, device_id, permission_id),
+            json=permission_obj
+        )
+        if response.status_code != 200:
             raise Exception("Error in connection with AuthService: "
                             + response.text)
         return response.json()

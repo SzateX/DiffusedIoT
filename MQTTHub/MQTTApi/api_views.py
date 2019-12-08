@@ -58,8 +58,8 @@ class DevicesApiForUserView(APIView):
     def get_one(self, request, pk, format=None):
         me = AuthServiceApi.get_me(self.request.headers.get('Authorization'))
         if not me['is_staff']:
-            user_permissions = AuthServiceApi.get_device_user_permission(HUB_ID, pk)
-            group_permissions = AuthServiceApi.get_device_group_permission(HUB_ID, pk)
+            user_permissions = AuthServiceApi.get_device_user_permissions(HUB_ID, pk)
+            group_permissions = AuthServiceApi.get_device_group_permissions(HUB_ID, pk)
             groups_pk = map(lambda group: group['pk'], me['groups'])
             filtered_group_permissions = filter(
                 lambda x: x['pk'] in groups_pk and x['read_permission'] is True,

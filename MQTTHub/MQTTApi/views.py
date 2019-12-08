@@ -189,7 +189,7 @@ class DevicePermissionsView(HubUserPassesTestMixin, TemplateView):
         for permission in permissions:
             for group in groups:
                 if group['pk'] == permission['group']:
-                    permission['user'] = group
+                    permission['group'] = group
                     perms.append(permission)
                     break
         return perms
@@ -201,8 +201,8 @@ class DevicePermissionsView(HubUserPassesTestMixin, TemplateView):
         self.device = device
         self.users = AuthServiceApi.get_users()
         self.groups = AuthServiceApi.get_groups()
-        self.user_permissions = AuthServiceApi.get_device_user_permission(hub['pk'], device['pk'])
-        self.group_permissions = AuthServiceApi.get_device_group_permission(hub['pk'], device['pk'])
+        self.user_permissions = AuthServiceApi.get_device_user_permissions(hub['pk'], device['pk'])
+        self.group_permissions = AuthServiceApi.get_device_group_permissions(hub['pk'], device['pk'])
         return super(DevicePermissionsView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -248,12 +248,10 @@ class AddDeviceUserPermissionView(HubUserPassesTestMixin, FormView):
         return HttpResponseRedirect(self.get_success_url())
     
     def form_invalid(self, form):
-        print("DUPA")
-        print(form.errors)
         return super(AddDeviceUserPermissionView, self).form_invalid(form)
 
     def get_success_url(self):
-        return 'dashboard/hub/%s/device/%s/permissions/' % (self.kwargs.get('hub'), self.kwargs.get('device'))
+        return '/hub/dashboard/hub/%s/device/%s/permissions/' % (self.kwargs.get('hub'), self.kwargs.get('device'))
         
 
 class AddDeviceGroupPermissionView(HubUserPassesTestMixin, FormView):
@@ -269,7 +267,7 @@ class AddDeviceGroupPermissionView(HubUserPassesTestMixin, FormView):
         return super(AddDeviceGroupPermissionView, self).get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        self.groups = AuthServiceApi.get_users()
+        self.groups = AuthServiceApi.get_groups()
         return super(AddDeviceGroupPermissionView, self).post(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -282,13 +280,129 @@ class AddDeviceGroupPermissionView(HubUserPassesTestMixin, FormView):
         device_id = int(self.kwargs.get('pk'))
         form.cleaned_data['group'] = int(form.cleaned_data['group'])
         form.cleaned_data['device'] = device_id
-        AuthServiceApi.add_device_group_permission(hub, device_id, form.cleaned_data)
+        AuthServiceApi.add_device_group_permission(hub['pk'], device_id, form.cleaned_data)
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return 'dashboard/hub/%s/device/%s/permissions/' % (self.kwargs.get('hub'), self.kwargs.get('device'))
+        return '/hub/dashboard/hub/%s/device/%s/permissions/' % (self.kwargs.get('hub'), self.kwargs.get('device'))
 
     def get_form(self, form_class=None):
         if form_class is None:
             form_class = self.get_form_class()
         return form_class(self.groups, **self.get_form_kwargs())
+
+
+class UpdateDeviceUserPermissionView(HubUserPassesTestMixin, FormView):
+    form_class = UserPermissionForm
+    template_name = 'MQTTApi/permissions/add.html'
+    login_url = '/hub/login/'
+
+    def test_func(self):
+        return self.user['is_staff']
+
+    def get(self, request, *args, **kwargs):
+        self.users = AuthServiceApi.get_users()
+        hub_id = kwargs.get('hub')
+        device_id = kwargs.get('device')
+        permission_id = kwargs.get('pk')
+        self.object = AuthServiceApi.get_device_user_permission(hub_id,
+                                                                device_id,
+                                                                permission_id)
+        return super(UpdateDeviceUserPermissionView, self).get(request, *args,
+                                                            **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.users = AuthServiceApi.get_users()
+        hub_id = kwargs.get('hub')
+        device_id = kwargs.get('device')
+        permission_id = kwargs.get('pk')
+        self.object = AuthServiceApi.get_device_user_permission(hub_id,
+                                                                device_id,
+                                                                permission_id)
+        return super(UpdateDeviceUserPermissionView, self).post(request, *args,
+                                                             **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(UpdateDeviceUserPermissionView, self).get_context_data(
+            **kwargs)
+        # context['form'] = self.get_form_class()(user_list=self.users)
+        return context
+
+    def get_form(self, form_class=None):
+        if form_class is None:
+            form_class = self.get_form_class()
+        return form_class(self.users, **self.get_form_kwargs())
+
+    def form_valid(self, form):
+        hub = AuthServiceApi.get_hub(self.kwargs['hub'])
+        device_id = int(self.kwargs.get('device'))
+        permission_id = self.kwargs.get('pk')
+        form.cleaned_data['user'] = int(form.cleaned_data['user'])
+        form.cleaned_data['device'] = device_id
+        AuthServiceApi.update_device_user_permission(hub['pk'], device_id, permission_id,
+                                                  form.cleaned_data)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def form_invalid(self, form):
+        return super(UpdateDeviceUserPermissionView, self).form_invalid(form)
+
+    def get_success_url(self):
+        return '/hub/dashboard/hub/%s/device/%s/permissions/' % (
+        self.kwargs.get('hub'), self.kwargs.get('device'))
+
+    def get_initial(self):
+        return self.object
+
+
+class UpdateDeviceGroupPermissionView(HubUserPassesTestMixin, FormView):
+    form_class = GroupPermissionForm
+    template_name = 'MQTTApi/permissions/add.html'
+    login_url = '/hub/login/'
+
+    def test_func(self):
+        return self.user['is_staff']
+
+    def get(self, request, *args, **kwargs):
+        self.groups = AuthServiceApi.get_groups()
+        hub_id = kwargs.get('hub')
+        device_id = kwargs.get('device')
+        permission_id = kwargs.get('pk')
+        self.object = AuthServiceApi.get_device_group_permission(hub_id,
+                                                                device_id,
+                                                                permission_id)
+        return super(UpdateDeviceGroupPermissionView, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.groups = AuthServiceApi.get_groups()
+        hub_id = kwargs.get('hub')
+        device_id = kwargs.get('device')
+        permission_id = kwargs.get('pk')
+        self.object = AuthServiceApi.get_device_group_permission(hub_id,
+                                                                device_id,
+                                                                permission_id)
+
+        return super(UpdateDeviceGroupPermissionView, self).post(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(UpdateDeviceGroupPermissionView, self).get_context_data(**kwargs)
+        # context['form'] = self.get_form_class()(group_list=self.groups)
+        return context
+
+    def form_valid(self, form):
+        hub = AuthServiceApi.get_hub(self.kwargs['hub'])
+        device_id = int(self.kwargs.get('pk'))
+        form.cleaned_data['group'] = int(form.cleaned_data['group'])
+        form.cleaned_data['device'] = device_id
+        AuthServiceApi.add_device_group_permission(hub['pk'], device_id, form.cleaned_data)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return '/hub/dashboard/hub/%s/device/%s/permissions/' % (self.kwargs.get('hub'), self.kwargs.get('device'))
+
+    def get_form(self, form_class=None):
+        if form_class is None:
+            form_class = self.get_form_class()
+        return form_class(self.groups, **self.get_form_kwargs())
+
+    def get_initial(self):
+        return self.object
