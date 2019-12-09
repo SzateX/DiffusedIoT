@@ -5,7 +5,7 @@
     <body>
         <a href="{% url 'hub_devices_add' hub %}">Dodaj urządzenie</a><br><br>
         {% for device in devices %}
-            {{ device }} <a href="{% url 'hub_devices_update' hub device.pk %}">Edytuj urządzenie</a> <a href="{% url 'hub_device_permissions' hub device.pk %}">Reguły dostępu</a><br>
+            <a href="{% url 'device_units' hub device.pk %}">{{ device }}</a> <a href="{% url 'hub_devices_update' hub device.pk %}">Edytuj urządzenie</a> <a href="{% url 'hub_device_permissions' hub device.pk %}">Reguły dostępu</a><br>
         {% endfor %}
     </body>
 </html>

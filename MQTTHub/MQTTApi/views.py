@@ -10,7 +10,7 @@ from MQTTApi.services import AuthServiceApi, InternalApi
 from MQTTHub import settings
 from MQTTHub.settings import AUTH_SERVICE_ADDRESS
 from MQTTApi.forms import HubAuthorizationForm, HubDeviceForm, \
-    UserPermissionForm, GroupPermissionForm
+    UserPermissionForm, GroupPermissionForm, UnitForm
 
 
 class HubLoginRequiredMixin(AccessMixin):
@@ -447,3 +447,38 @@ class DeleteDeviceGroupPermissionView(HubUserPassesTestMixin, RedirectView):
         print(s)
         print(type(s))
         return s
+
+
+class DeviceUnitsView(HubLoginRequiredMixin, TemplateView):
+    login_url = '/hub/login/'
+    template_name = 'MQTTApi/units/list.html'
+
+    def get(self, request, *args, **kwargs):
+        hub = AuthServiceApi.get_hub(self.kwargs.get('hub'))
+        self.device = InternalApi.get_device(self.request.COOKIES.get('user_token'), hub, self.kwargs.get('pk'))
+        self.units = InternalApi.get_units(self.request.COOKIES.get('user_token'), hub, self.kwargs.get('pk'))
+        self.user = AuthServiceApi.get_me(self.request.COOKIES.get('user_token'))
+        return super(DeviceUnitsView, self).get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(DeviceUnitsView, self).get_context_data(**kwargs)
+        context['device'] = self.device
+        context['units'] = self.units
+        context['user'] = self.user
+        return context
+
+
+class AddDeviceUnitView(HubUserPassesTestMixin, FormView):
+    login_url = '/hub/login/'
+    template_name = 'MQTTApi/units/add.html'
+    form_class = UnitForm
+
+    def test_func(self):
+        return self.user['is_staff']
+
+    def form_valid(self, form):
+        hub = AuthServiceApi.get_hub(self.kwargs.get('hub'))
+        device_id = self.kwargs.get('pk')
+        token = self.request.COOKIES.get(
+            'user_token')
+

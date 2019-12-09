@@ -282,3 +282,30 @@ class InternalApi(object):
             raise Exception("Error in connection with InternalApi: "
                             + response.text)
 
+    @staticmethod
+    def get_units(token, hub, device_id):
+        response = requests.get(
+            hub['private_address'] + "/hub/internal_api/devices_for_user/%s/units/" % device_id,
+            headers={
+                'Authorization': token
+            },
+        )
+        if response.status_code not in [200, 201]:
+            raise Exception("Error in connection with InternalApi: "
+                            + response.text)
+        return response.json()
+
+    @staticmethod
+    def add_unit(token, hub, device_id, cleaned_data):
+        response = requests.post(
+            hub[
+                'private_address'] + "/hub/internal_api/devices_for_user/%s/units/" % device_id,
+            headers={
+                'Authorization': token
+            },
+            json=cleaned_data
+        )
+        if response.status_code not in [200, 201]:
+            raise Exception("Error in connection with InternalApi: "
+                            + response.text)
+        return response.json()

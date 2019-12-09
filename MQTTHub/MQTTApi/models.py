@@ -30,6 +30,7 @@ class DeviceUnit(models.Model):
                                max_length=200)
     direction = models.CharField(choices=DIRECTION_CHOICES, max_length=200)
     type_of_unit = models.CharField(choices=TYPE_CHOICES, max_length=200)
+    name = models.CharField(max_length=200)
 
 
 class GenericUnitValue(models.Model):

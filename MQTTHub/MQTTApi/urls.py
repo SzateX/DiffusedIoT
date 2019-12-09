@@ -16,4 +16,5 @@ urlpatterns = [
     url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<device>\d+)/permissions/group/(?P<pk>\d+)/update/$', v.UpdateDeviceGroupPermissionView.as_view(), name='update_group_permission'),
     url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<device>\d+)/permissions/user/(?P<pk>\d+)/delete/$', v.DeleteDeviceUserPermissionView.as_view(), name='delete_user_permission'),
     url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<device>\d+)/permissions/group/(?P<pk>\d+)/delete/$', v.DeleteDeviceGroupPermissionView.as_view(), name='delete_group_permission'),
+    url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<pk>\d+)/units/$', v.DeviceUnitsView.as_view(), name='device_units'),
 ] + api_urls.urlpatterns

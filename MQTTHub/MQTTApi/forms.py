@@ -3,7 +3,7 @@ from django import forms
 import requests
 from django.urls import resolve, reverse
 
-from MQTTApi.models import Device
+from MQTTApi.models import Device, DeviceUnit
 from MQTTApi.services import AuthServiceApi
 from MQTTHub.settings import AUTH_SERVICE_ADDRESS
 
@@ -53,3 +53,9 @@ class GroupPermissionForm(forms.Form):
         if group_list:
             print(group_list)
             self.fields['group'].choices = ((int(group['pk']), group['name']) for group in group_list)
+
+
+class UnitForm(forms.Form):
+    name = forms.CharField(max_length=200)
+    direction = forms.ChoiceField(choices=DeviceUnit.DIRECTION_CHOICES)
+    type_of_unit = forms.ChoiceField(choices=DeviceUnit.TYPE_CHOICES)
