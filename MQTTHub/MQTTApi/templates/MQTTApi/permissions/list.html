@@ -8,12 +8,12 @@
     {{device}}<br><br>
     User rules <a href="{% url 'add_user_permission' hub device.pk %}">Add Rule</a>:<br>
     {% for user_perm in user_permissions %}
-        {{user_perm}} <a href="{% url 'update_user_permission' hub device.pk user_perm.pk %}">Edit</a><br>
+        {{user_perm}} <a href="{% url 'update_user_permission' hub device.pk user_perm.pk %}">Edit</a> <a href="{% url 'delete_user_permission' hub device.pk user_perm.pk %}">Delete</a><br>
     {% endfor %}
     <br><br>
     Group rules <a href="{% url 'add_group_permission' hub device.pk %}">Add Rule</a>:<br>
     {% for group_perm in group_permissions %}
-        {{group_perm}}<br>
+        {{group_perm}} <a href="{% url 'update_group_permission' hub device.pk group_perm.pk %}">Edit</a> <a href="{% url 'delete_group_permission' hub device.pk group_perm.pk %}">Delete</a><br>
     {% endfor %}
 </body>
 </html>

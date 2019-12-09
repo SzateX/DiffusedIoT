@@ -158,7 +158,7 @@ class AuthServiceApi(object):
             json=permission_obj
         )
         print(response.status_code)
-        if response.status_code != 201:
+        if response.status_code not in [200, 201]:
             raise Exception("Error in connection with AuthService: "
                             + response.text)
         return response.json()
@@ -170,7 +170,7 @@ class AuthServiceApi(object):
                 hub_id, device_id),
             json=permission_obj
         )
-        if response.status_code in [200, 201]:
+        if response.status_code not in [200, 201]:
             raise Exception("Error in connection with AuthService: "
                             + response.text)
         return response.json()
@@ -198,6 +198,28 @@ class AuthServiceApi(object):
             raise Exception("Error in connection with AuthService: "
                             + response.text)
         return response.json()
+
+    @staticmethod
+    def delete_device_user_permission(hub_id, device_id, permission_id):
+        response = requests.delete(
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/user_permissions/%s/" % (
+                hub_id, device_id, permission_id),
+        )
+        if response.status_code != 204:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+        return response
+
+    @staticmethod
+    def delete_device_group_permission(hub_id, device_id, permission_id):
+        response = requests.delete(
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/group_permissions/%s/" % (
+                hub_id, device_id, permission_id),
+        )
+        if response.status_code != 204:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+        return response
 
     @staticmethod
     def register_device(hub_id, device):

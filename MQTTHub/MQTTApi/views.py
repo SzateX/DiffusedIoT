@@ -2,9 +2,9 @@ import requests
 from django.contrib.auth.mixins import AccessMixin
 from django.contrib.auth.views import redirect_to_login
 from django.http import HttpResponseRedirect
-from django.shortcuts import resolve_url
+from django.shortcuts import resolve_url, redirect
 from django.utils.http import is_safe_url
-from django.views.generic import FormView, TemplateView
+from django.views.generic import FormView, TemplateView, RedirectView
 
 from MQTTApi.services import AuthServiceApi, InternalApi
 from MQTTHub import settings
@@ -40,6 +40,11 @@ class HubUserPassesTestMixin(AccessMixin):
             '{0} is missing the implementation of the test_func() method.'.format(
                 self.__class__.__name__)
         )
+
+    def handle_no_permission(self):
+        return redirect_to_login(self.request.get_full_path(),
+                                 self.get_login_url(),
+                                 self.get_redirect_field_name())
 
 
 class HubLoginView(FormView):
@@ -251,7 +256,7 @@ class AddDeviceUserPermissionView(HubUserPassesTestMixin, FormView):
         return super(AddDeviceUserPermissionView, self).form_invalid(form)
 
     def get_success_url(self):
-        return '/hub/dashboard/hub/%s/device/%s/permissions/' % (self.kwargs.get('hub'), self.kwargs.get('device'))
+        return '/hub/dashboard/hub/%s/device/%s/permissions/' % (self.kwargs.get('hub'), self.kwargs.get('pk'))
         
 
 class AddDeviceGroupPermissionView(HubUserPassesTestMixin, FormView):
@@ -284,7 +289,7 @@ class AddDeviceGroupPermissionView(HubUserPassesTestMixin, FormView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return '/hub/dashboard/hub/%s/device/%s/permissions/' % (self.kwargs.get('hub'), self.kwargs.get('device'))
+        return '/hub/dashboard/hub/%s/device/%s/permissions/' % (self.kwargs.get('hub'), self.kwargs.get('pk'))
 
     def get_form(self, form_class=None):
         if form_class is None:
@@ -390,10 +395,11 @@ class UpdateDeviceGroupPermissionView(HubUserPassesTestMixin, FormView):
 
     def form_valid(self, form):
         hub = AuthServiceApi.get_hub(self.kwargs['hub'])
-        device_id = int(self.kwargs.get('pk'))
+        device_id = int(self.kwargs.get('device'))
+        permission_id = self.kwargs.get('pk')
         form.cleaned_data['group'] = int(form.cleaned_data['group'])
         form.cleaned_data['device'] = device_id
-        AuthServiceApi.add_device_group_permission(hub['pk'], device_id, form.cleaned_data)
+        AuthServiceApi.update_device_group_permission(hub['pk'], device_id, permission_id, form.cleaned_data)
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
@@ -406,3 +412,38 @@ class UpdateDeviceGroupPermissionView(HubUserPassesTestMixin, FormView):
 
     def get_initial(self):
         return self.object
+
+
+class DeleteDeviceUserPermissionView(HubUserPassesTestMixin, RedirectView):
+    def test_func(self):
+        return self.user['is_staff']
+
+    def get(self, *args, **kwargs):
+        hub_id = kwargs.get('hub')
+        device_id = kwargs.get('device')
+        permission_id = kwargs.get('pk')
+        AuthServiceApi.delete_device_user_permission(hub_id, device_id, permission_id)
+        return redirect(self.get_success_url())
+
+    def get_success_url(self):
+        s = '/hub/dashboard/hub/%s/device/%s/permissions/' % (
+        self.kwargs.get('hub'), self.kwargs.get('device'))
+        return s
+
+
+class DeleteDeviceGroupPermissionView(HubUserPassesTestMixin, RedirectView):
+    def test_func(self):
+        return self.user['is_staff']
+
+    def get(self, *args, **kwargs):
+        hub_id = kwargs.get('hub')
+        device_id = kwargs.get('device')
+        permission_id = kwargs.get('pk')
+        AuthServiceApi.delete_device_group_permission(hub_id, device_id, permission_id)
+        return redirect(self.get_success_url())
+
+    def get_success_url(self):
+        s = '/hub/dashboard/hub/%s/device/%s/permissions/' % (self.kwargs.get('hub'), self.kwargs.get('device'))
+        print(s)
+        print(type(s))
+        return s

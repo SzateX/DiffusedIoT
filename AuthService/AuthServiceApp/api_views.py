@@ -150,7 +150,7 @@ class DeviceUserPermissionsView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, pk, format=None):
+    def delete(self, request, hub, device, pk, format=None):
         hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
         device = self.get_object(RegisteredDevice, hub=hub,
                                  device_id=self.kwargs.get("device"))
@@ -201,7 +201,7 @@ class DeviceGroupPermissionsView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, pk, format=None):
+    def delete(self, request, hub, device, pk, format=None):
         hub = self.get_object(Hub, pk=self.kwargs.get("hub"))
         device = self.get_object(RegisteredDevice, hub=hub,
                                  device_id=self.kwargs.get("device"))
