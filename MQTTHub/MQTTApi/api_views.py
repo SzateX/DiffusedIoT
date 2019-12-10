@@ -98,23 +98,29 @@ class DevicesApiForUserView(APIView):
 
 
 class DeviceUnitsApiView(APIView):
-    def get(self, request, device, format=None):
+    def get(self, request, device, pk=None, format=None):
         me = AuthServiceApi.get_me(self.request.headers.get('Authorization'))
         user_permissions = AuthServiceApi.get_device_user_permissions(HUB_ID,
                                                                       device)
         group_permissions = AuthServiceApi.get_device_group_permissions(HUB_ID,
                                                                         device)
         device_obj = Device.objects.get(pk=device)
-        if me['is_staff']:
-            objects = DeviceUnit.objects.filter(device=device_obj)
+        if pk is None:
+            if me['is_staff']:
+                objects = DeviceUnit.objects.filter(device=device_obj)
+            else:
+                devices_pk = get_devices_pks(me, user_permissions,
+                                             group_permissions)
+                if device not in devices_pk:
+                    return Response(status=status.HTTP_403_FORBIDDEN)
+                objects = DeviceUnit.objects.filter(device=device_obj)
         else:
-            devices_pk = get_devices_pks(me, user_permissions,
-                                         group_permissions)
-            if device not in devices_pk:
+            if me['is_staff']:
+                objects = DeviceUnit.objects.get(device=device_obj, pk=pk)
+            else:
                 return Response(status=status.HTTP_403_FORBIDDEN)
-            objects = DeviceUnit.objects.filter(device=device_obj)
 
-        serializer = DeviceUnitSerializer(objects, many=True)
+        serializer = DeviceUnitSerializer(objects, many=pk is None)
         return Response(serializer.data)
 
     def post(self, request, device, format=None):
@@ -127,5 +133,27 @@ class DeviceUnitsApiView(APIView):
             DeviceUnit.objects.create(device=device,
                                       **serializer.validated_data)
             return Response(serializer.validated_data,
-                            status=status.HTTP_202_ACCEPTED)
+                            status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, device, pk, format=None):
+        me = AuthServiceApi.get_me(self.request.headers.get('Authorization'))
+        if not me['is_staff']:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        serializer = DeviceUnitSerializer(data=request.data)
+        if serializer.is_valid():
+            unit = DeviceUnit.objects.get(pk=pk)
+            unit.name = serializer.validated_data['name']
+            unit.direction = serializer.validated_data['direction']
+            unit.type_of_unit = serializer.validated_data['type_of_unit']
+            unit.save()
+            return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, device, pk, format=None):
+        me = AuthServiceApi.get_me(self.request.headers.get('Authorization'))
+        if not me['is_staff']:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        unit = DeviceUnit.objects.get(pk=pk)
+        unit.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

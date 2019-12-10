@@ -443,10 +443,7 @@ class DeleteDeviceGroupPermissionView(HubUserPassesTestMixin, RedirectView):
         return redirect(self.get_success_url())
 
     def get_success_url(self):
-        s = '/hub/dashboard/hub/%s/device/%s/permissions/' % (self.kwargs.get('hub'), self.kwargs.get('device'))
-        print(s)
-        print(type(s))
-        return s
+        return '/hub/dashboard/hub/%s/device/%s/permissions/' % (self.kwargs.get('hub'), self.kwargs.get('device'))
 
 
 class DeviceUnitsView(HubLoginRequiredMixin, TemplateView):
@@ -481,4 +478,67 @@ class AddDeviceUnitView(HubUserPassesTestMixin, FormView):
         device_id = self.kwargs.get('pk')
         token = self.request.COOKIES.get(
             'user_token')
+        InternalApi.add_unit(token, hub, device_id, form.cleaned_data)
+        return super(AddDeviceUnitView, self).form_valid(form)
 
+    def get_success_url(self):
+        return '/hub/dashboard/hub/%s/device/%s/units/' % (self.kwargs.get('hub'), self.kwargs.get('pk'))
+
+
+class UpdateDeviceUnitView(HubUserPassesTestMixin, FormView):
+    login_url = '/hub/login/'
+    template_name = 'MQTTApi/units/add.html'
+    form_class = UnitForm
+
+    def test_func(self):
+        return self.user['is_staff']
+
+    def form_valid(self, form):
+        hub = AuthServiceApi.get_hub(self.kwargs.get('hub'))
+        device_id = self.kwargs.get('device')
+        pk = self.kwargs.get('pk')
+        token = self.request.COOKIES.get(
+            'user_token')
+        InternalApi.update_unit(token, hub, device_id, pk, form.cleaned_data)
+        return super(UpdateDeviceUnitView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(UpdateDeviceUnitView, self).get_context_data(**kwargs)
+        context['form'] = self.get_form_class()(initial=self.object)
+        return context
+        
+    def get(self, request, *args, **kwargs):
+        hub = AuthServiceApi.get_hub(self.kwargs.get('hub'))
+        device_id = self.kwargs.get('device')
+        token = self.request.COOKIES.get(
+            'user_token')
+        self.object = InternalApi.get_unit(token, hub, device_id, self.kwargs.get('pk'))
+        return super(UpdateDeviceUnitView, self).get(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        hub = AuthServiceApi.get_hub(self.kwargs.get('hub'))
+        device_id = self.kwargs.get('device')
+        token = self.request.COOKIES.get(
+            'user_token')
+        self.object = InternalApi.get_unit(token, hub, device_id,
+                                           self.kwargs.get('pk'))
+        return super(UpdateDeviceUnitView, self).post(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return '/hub/dashboard/hub/%s/device/%s/units/' % (self.kwargs.get('hub'), self.kwargs.get('device'))
+
+
+class DeleteDeviceUnitView(HubUserPassesTestMixin, RedirectView):
+    def test_func(self):
+        return self.user['is_staff']
+
+    def get(self, *args, **kwargs):
+        hub = AuthServiceApi.get_hub(self.kwargs.get('hub'))
+        device_id = self.kwargs.get('device')
+        token = self.request.COOKIES.get(
+            'user_token')
+        InternalApi.delete_unit(token, hub, device_id, self.kwargs.get('pk'))
+        return redirect(self.get_success_url())
+
+    def get_success_url(self):
+        return '/hub/dashboard/hub/%s/device/%s/units/' % (self.kwargs.get('hub'), self.kwargs.get('device'))

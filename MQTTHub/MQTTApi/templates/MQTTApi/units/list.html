@@ -4,9 +4,9 @@
     </head>
     <body>
         {{ device }}<br><br><br>
-
+        <a href="{% url 'add_device_unit' hub device.pk %}">Add Unit</a><br>
         {% for unit in units %}
-            {{ unit }}<br>
+            {{ unit }} <a href="{% url 'update_device_unit' hub device.pk unit.pk %}">Edit Unit</a> <a href="{% url 'delete_device_unit' hub device.pk unit.pk %}">Delete Unit</a><br><br>
         {% endfor %}
     </body>
 </html>

@@ -296,6 +296,20 @@ class InternalApi(object):
         return response.json()
 
     @staticmethod
+    def get_unit(token, hub, device_id, pk):
+        response = requests.get(
+            hub[
+                'private_address'] + "/hub/internal_api/devices_for_user/%s/units/%s/" % (device_id, pk),
+            headers={
+                'Authorization': token
+            },
+        )
+        if response.status_code not in [200, 201]:
+            raise Exception("Error in connection with InternalApi: "
+                            + response.text)
+        return response.json()
+
+    @staticmethod
     def add_unit(token, hub, device_id, cleaned_data):
         response = requests.post(
             hub[
@@ -309,3 +323,33 @@ class InternalApi(object):
             raise Exception("Error in connection with InternalApi: "
                             + response.text)
         return response.json()
+
+    @staticmethod
+    def update_unit(token, hub, device_id, pk, cleaned_data):
+        response = requests.put(
+            hub[
+                'private_address'] + "/hub/internal_api/devices_for_user/%s/units/%s/" % (device_id, pk),
+            headers={
+                'Authorization': token
+            },
+            json=cleaned_data
+        )
+        if response.status_code not in [200, 201]:
+            raise Exception("Error in connection with InternalApi: "
+                            + response.text)
+        return response.json()
+
+    @staticmethod
+    def delete_unit(token, hub, device_id, pk):
+        response = requests.delete(
+            hub[
+                'private_address'] + "/hub/internal_api/devices_for_user/%s/units/%s/" % (
+            device_id, pk),
+            headers={
+                'Authorization': token
+            },
+        )
+        if response.status_code not in [204]:
+            raise Exception("Error in connection with InternalApi: "
+                            + response.text)
+        return response
