@@ -64,3 +64,10 @@ class HumidityUnitValue(GenericUnitValue):
     value = models.DecimalField(decimal_places=2, max_digits=10)
     unit = models.CharField(choices=UNIT_CHOICES,
                             max_length=200)
+
+
+class ConnectedUnit(models.Model):
+    from_unit = models.ForeignKey(DeviceUnit, on_delete=models.CASCADE)
+    to_hub = models.IntegerField()
+    to_device = models.IntegerField()
+    to_unit = models.IntegerField()
