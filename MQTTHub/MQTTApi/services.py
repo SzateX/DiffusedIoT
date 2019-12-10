@@ -50,19 +50,6 @@ class AuthServiceApi(object):
         return response.json()
 
     @staticmethod
-    def get_devices(token, hub):
-        response = requests.get(
-            hub['private_address'] + "/hub/internal_api/devices_for_user/",
-            headers={
-                'Authorization': "Bearer " + token
-            }
-        )
-        if response.status_code != 200:
-            raise Exception("Error in connection with AuthService: "
-                            + response.text)
-        return response.json()
-
-    @staticmethod
     def sign_in(username, password):
         response = requests.post(
             AUTH_SERVICE_ADDRESS + "/api/user_auth/sign_in/", json={
@@ -237,6 +224,19 @@ class AuthServiceApi(object):
 
 
 class InternalApi(object):
+    @staticmethod
+    def get_devices(token, hub):
+        response = requests.get(
+            hub['private_address'] + "/hub/internal_api/devices_for_user/",
+            headers={
+                'Authorization': "Bearer " + token
+            }
+        )
+        if response.status_code != 200:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+        return response.json()
+
     @staticmethod
     def save_device(token, hub, form):
         response = requests.post(

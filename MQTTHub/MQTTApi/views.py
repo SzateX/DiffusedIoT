@@ -112,7 +112,7 @@ class HubDeviceView(HubLoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         hub = AuthServiceApi.get_hub(int(kwargs.get('hub')))
-        self.devices = AuthServiceApi.get_devices(self.request.COOKIES.get('user_token'), hub)
+        self.devices = InternalApi.get_devices(self.request.COOKIES.get('user_token'), hub)
         return super(HubDeviceView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -542,3 +542,47 @@ class DeleteDeviceUnitView(HubUserPassesTestMixin, RedirectView):
 
     def get_success_url(self):
         return '/hub/dashboard/hub/%s/device/%s/units/' % (self.kwargs.get('hub'), self.kwargs.get('device'))
+
+
+class ConnectUnitHubSelectView(HubUserPassesTestMixin, TemplateView):
+    def test_func(self):
+        return self.user['is_staff']
+
+    def get(self, *args, **kwargs):
+        self.hubs = AuthServiceApi.get_hubs()
+        super(ConnectUnitHubSelectView, self).get(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(ConnectUnitHubSelectView, self).get_context_data(**kwargs)
+        context['hubs'] = self.hubs
+        return context
+
+
+class ConnectUnitDeviceSelectView(HubUserPassesTestMixin, TemplateView):
+    def test_func(self):
+        return self.user['is_staff']
+
+    def get(self, *args, **kwargs):
+        token = self.request.COOKIES.get(
+            'user_token')
+        self.hub = AuthServiceApi.get_hub(self.kwargs.get('pk'))
+        self.devices = InternalApi.get_devices(token, self.hub['pk'])
+        super(ConnectUnitDeviceSelectView, self).get(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(ConnectUnitDeviceSelectView, self).get_context_data(**kwargs)
+        context['hub'] = self.hub
+        context['devices'] = self.devices
+        return context
+
+
+class ConnectUnitSelectUnitView(HubUserPassesTestMixin, TemplateView):
+    def test_func(self):
+        return self.user['is_staff']
+
+    def get(self, *args, **kwargs):
+        token = self.request.COOKIES.get('user_token')
+        self.hub = AuthServiceApi.get_hub(self.kwargs.get('hub'))
+        self.device = InternalApi.get_device(token, self.hub['pk'], self.kwargs.get('pk'))
+        source_unit = InternalApi.get_unit(token, self.kwargs.get('hub'), self.kwargs.get('device'), self.kwargs.get('pk'))
+        units = InternalApi.get_units(token, self.hub['pk'], self.device['pk'])
