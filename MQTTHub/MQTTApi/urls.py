@@ -20,4 +20,8 @@ urlpatterns = [
     url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<pk>\d+)/units/add/$', v.AddDeviceUnitView.as_view(), name='add_device_unit'),
     url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<device>\d+)/units/(?P<pk>\d+)/update/$', v.UpdateDeviceUnitView.as_view(), name='update_device_unit'),
     url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<device>\d+)/units/(?P<pk>\d+)/delete/$', v.DeleteDeviceUnitView.as_view(), name='delete_device_unit'),
+    url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<device>\d+)/units/(?P<pk>\d+)/connect_unit/$', v.ConnectUnitHubSelectView.as_view(), name='connect_unit_hub_select'),
+    url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<device>\d+)/units/(?P<pk>\d+)/connect_unit/(?P<dest_hub>\d+)/$', v.ConnectUnitDeviceSelectView.as_view(), name='connect_unit_device_select'),
+    url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<device>\d+)/units/(?P<pk>\d+)/connect_unit/(?P<dest_hub>\d+)/(?P<dest_device>\d+)/$', v.ConnectUnitSelectUnitView.as_view(), name='connect_unit_unit_select'),
+    url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<device>\d+)/units/(?P<pk>\d+)/connect_unit/(?P<dest_hub>\d+)/(?P<dest_device>\d+)/(?P<dest_unit>\d+)/$', v.ConnectUnitSelectUnitView.as_view(), name='connect_unit_unit_select'),
 ] + api_urls.urlpatterns
