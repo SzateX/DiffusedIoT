@@ -529,6 +529,8 @@ class UpdateDeviceUnitView(HubUserPassesTestMixin, FormView):
 
 
 class DeleteDeviceUnitView(HubUserPassesTestMixin, RedirectView):
+    login_url = '/hub/login/'
+
     def test_func(self):
         return self.user['is_staff']
 
@@ -545,12 +547,15 @@ class DeleteDeviceUnitView(HubUserPassesTestMixin, RedirectView):
 
 
 class ConnectUnitHubSelectView(HubUserPassesTestMixin, TemplateView):
+    login_url = '/hub/login/'
+    template_name = 'MQTTApi/connected_units/hub_select.html'
+
     def test_func(self):
         return self.user['is_staff']
 
     def get(self, *args, **kwargs):
         self.hubs = AuthServiceApi.get_hubs()
-        super(ConnectUnitHubSelectView, self).get(*args, **kwargs)
+        return super(ConnectUnitHubSelectView, self).get(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(ConnectUnitHubSelectView, self).get_context_data(**kwargs)
@@ -559,15 +564,18 @@ class ConnectUnitHubSelectView(HubUserPassesTestMixin, TemplateView):
 
 
 class ConnectUnitDeviceSelectView(HubUserPassesTestMixin, TemplateView):
+    login_url = '/hub/login/'
+    template_name = 'MQTTApi/connected_units/device_select.html'
+
     def test_func(self):
         return self.user['is_staff']
 
     def get(self, *args, **kwargs):
         token = self.request.COOKIES.get(
             'user_token')
-        self.hub = AuthServiceApi.get_hub(self.kwargs.get('pk'))
+        self.hub = AuthServiceApi.get_hub(self.kwargs.get('dest_hub'))
         self.devices = InternalApi.get_devices(token, self.hub['pk'])
-        super(ConnectUnitDeviceSelectView, self).get(*args, **kwargs)
+        return super(ConnectUnitDeviceSelectView, self).get(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(ConnectUnitDeviceSelectView, self).get_context_data(**kwargs)
@@ -577,12 +585,22 @@ class ConnectUnitDeviceSelectView(HubUserPassesTestMixin, TemplateView):
 
 
 class ConnectUnitSelectUnitView(HubUserPassesTestMixin, TemplateView):
+    login_url = '/hub/login/'
+    template_name = 'MQTTApi/connected_units/unit_select.html'
+
     def test_func(self):
         return self.user['is_staff']
 
     def get(self, *args, **kwargs):
         token = self.request.COOKIES.get('user_token')
-        self.hub = AuthServiceApi.get_hub(self.kwargs.get('hub'))
-        self.device = InternalApi.get_device(token, self.hub['pk'], self.kwargs.get('pk'))
-        source_unit = InternalApi.get_unit(token, self.kwargs.get('hub'), self.kwargs.get('device'), self.kwargs.get('pk'))
-        units = InternalApi.get_units(token, self.hub['pk'], self.device['pk'])
+        self.hub = AuthServiceApi.get_hub(self.kwargs.get('dest_hub'))
+        self.device = InternalApi.get_device(token, self.hub['pk'], self.kwargs.get('dest_device'))
+        self.units = InternalApi.get_units(token, self.hub['pk'], self.device['pk'])
+        return super(ConnectUnitSelectUnitView, self).get(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(ConnectUnitSelectUnitView, self).get_context_data(**kwargs)
+        context['hub'] = self.hub
+        context['device'] = self.device
+        context['units'] = self.units
+        return context

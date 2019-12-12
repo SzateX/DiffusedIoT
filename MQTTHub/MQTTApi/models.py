@@ -68,6 +68,6 @@ class HumidityUnitValue(GenericUnitValue):
 
 class ConnectedUnit(models.Model):
     from_unit = models.ForeignKey(DeviceUnit, on_delete=models.CASCADE)
-    to_hub = models.IntegerField()
-    to_device = models.IntegerField()
-    to_unit = models.IntegerField()
+    dest_hub = models.IntegerField()
+    dest_device = models.IntegerField()
+    dest_unit = models.IntegerField()
