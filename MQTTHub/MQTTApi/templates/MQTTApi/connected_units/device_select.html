@@ -1,0 +1,13 @@
+<html>
+    <head>
+        <title>Connect Unit - Select DEvice</title>
+    </head>
+    <body>
+    Connect unit - Select Device<br><br>
+    You selected hub:<br>
+    {{ hub }} <br><br>
+    {% for dest_device in devices %}
+        <a href="{% url 'connect_unit_unit_select' view.kwargs.hub view.kwargs.device view.kwargs.pk hub.pk dest_device.pk %}">{{dest_device}}</a><br>
+    {% endfor %}
+    </body>
+</html>
