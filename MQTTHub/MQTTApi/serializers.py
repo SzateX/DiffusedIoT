@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from MQTTApi.models import Device, DeviceUnit
+from MQTTApi.models import Device, DeviceUnit, ConnectedUnit
 
 
 class DeviceSerializer(serializers.ModelSerializer):
@@ -15,3 +15,9 @@ class DeviceUnitSerializer(serializers.ModelSerializer):
         fields = ('pk', 'name', 'direction', 'type_of_unit')
 
 
+class ConnectedUnitSerializer(serializers.ModelSerializer):
+    from_unit = serializers.PrimaryKeyRelatedField()
+
+    class Meta:
+        model = ConnectedUnit
+        fields = ('pk', 'from_unit', 'dest_hub', 'dest_device', 'dest_unit')

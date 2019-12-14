@@ -353,3 +353,61 @@ class InternalApi(object):
             raise Exception("Error in connection with InternalApi: "
                             + response.text)
         return response
+
+    @staticmethod
+    def get_connected_units_with_unit(token, hub, with_unit):
+        response = requests.get(
+            hub[
+                'private_address'] + "/hub/internal_api/connected_units/from_unit/%s/" % with_unit,
+            headers={
+                'Authorization': token
+            },
+        )
+        if response.status_code not in [200, 201]:
+            raise Exception("Error in connection with InternalApi: "
+                            + response.text)
+        return response.json()
+
+    @staticmethod
+    def get_connected_unit_with_unit(token, hub, with_unit, unit):
+        response = requests.get(
+            hub[
+                'private_address'] + "/hub/internal_api/connected_units/from_unit/%s/%s/" % (with_unit, unit),
+            headers={
+                'Authorization': token
+            },
+        )
+        if response.status_code not in [200, 201]:
+            raise Exception("Error in connection with InternalApi: "
+                            + response.text)
+        return response.json()
+
+    @staticmethod
+    def add_connected_unit(token, hub, cleaned_data):
+        response = requests.post(
+            hub[
+                'private_address'] + "/hub/internal_api/connected_units/",
+            headers={
+                'Authorization': token
+            },
+            json=cleaned_data
+        )
+        if response.status_code not in [200, 201]:
+            raise Exception("Error in connection with InternalApi: "
+                            + response.text)
+        return response.json()
+
+    @staticmethod
+    def delete_connected_unit(token, hub, pk):
+        response = requests.delete(
+            hub[
+                'private_address'] + "/hub/internal_api/connected_units/%s/" % (
+                pk),
+            headers={
+                'Authorization': token
+            },
+        )
+        if response.status_code not in [204]:
+            raise Exception("Error in connection with InternalApi: "
+                            + response.text)
+        return response

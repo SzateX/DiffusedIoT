@@ -6,8 +6,9 @@ from rest_framework.views import APIView
 
 from MQTTApi.services import AuthServiceApi
 from MQTTHub.settings import AUTH_SERVICE_ADDRESS, HUB_ID
-from .models import Device, DeviceUnit
-from .serializers import DeviceSerializer, DeviceUnitSerializer
+from .models import Device, DeviceUnit, ConnectedUnit
+from .serializers import DeviceSerializer, DeviceUnitSerializer, \
+    ConnectedUnitSerializer
 
 
 def get_devices_pks(self, me, user_permissions, group_permissions):
@@ -156,4 +157,46 @@ class DeviceUnitsApiView(APIView):
             return Response(status=status.HTTP_403_FORBIDDEN)
         unit = DeviceUnit.objects.get(pk=pk)
         unit.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ConnectedUnitApiView(APIView):
+    def get(self, request, from_unit, pk=None, format=None):
+        me = AuthServiceApi.get_me(self.request.headers.get('Authorization'))
+        if not me['is_staff']:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        if pk is None:
+            return self.get_many(request, format)
+        else:
+            return self.get_single(request, pk, format)
+
+    def get_single(self, request, from_unit, pk, format=None):
+        f_unit = DeviceUnit.objects.get(pk=from_unit)
+        connected_unit = ConnectedUnit.objects.get(from_unit=f_unit, pk=pk)
+        serializer = ConnectedUnitSerializer(connected_unit)
+        return Response(serializer.data)
+
+    def get_many(self, request, from_unit, format=None):
+        f_unit = DeviceUnit.objects.get(pk=from_unit)
+        connected_units = ConnectedUnit.objects.filter(from_unit=f_unit)
+        serializer = ConnectedUnitSerializer(connected_units, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        me = AuthServiceApi.get_me(self.request.headers.get('Authorization'))
+        if not me['is_staff']:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        serializer = ConnectedUnitSerializer(request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.validated_data,
+                            status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        me = AuthServiceApi.get_me(self.request.headers.get('Authorization'))
+        if not me['is_staff']:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        connected_unit = ConnectedUnit.objects.get(pk=pk)
+        connected_unit.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
