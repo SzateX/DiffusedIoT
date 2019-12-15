@@ -256,7 +256,7 @@ class InternalApi(object):
     @staticmethod
     def get_device(token, hub, device_id):
         response = requests.get(
-            hub['private_address'] + "/hub/internal_api/devices_for_user/%s/" % int(device_id),
+            hub['private_address'] + "/hub/internal_api/devices_for_user/%s/" % device_id,
             headers={
                 'Authorization': token
             },

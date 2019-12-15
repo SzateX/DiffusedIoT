@@ -8,7 +8,7 @@ from MQTTApi.services import AuthServiceApi
 from MQTTHub.settings import AUTH_SERVICE_ADDRESS, HUB_ID
 from .models import Device, DeviceUnit, ConnectedUnit
 from .serializers import DeviceSerializer, DeviceUnitSerializer, \
-    ConnectedUnitSerializer
+    ConnectedUnitSerializer, ConnectedUnitSaveSerializer
 
 
 def get_devices_pks(self, me, user_permissions, group_permissions):
@@ -166,9 +166,9 @@ class ConnectedUnitApiView(APIView):
         if not me['is_staff']:
             return Response(status=status.HTTP_403_FORBIDDEN)
         if pk is None:
-            return self.get_many(request, format)
+            return self.get_many(request, from_unit, format)
         else:
-            return self.get_single(request, pk, format)
+            return self.get_single(request, from_unit, pk, format)
 
     def get_single(self, request, from_unit, pk, format=None):
         f_unit = DeviceUnit.objects.get(pk=from_unit)
@@ -186,10 +186,12 @@ class ConnectedUnitApiView(APIView):
         me = AuthServiceApi.get_me(self.request.headers.get('Authorization'))
         if not me['is_staff']:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        serializer = ConnectedUnitSerializer(request.data)
+        serializer = ConnectedUnitSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.validated_data,
+            # device_unit = DeviceUnit.objects.get(pk=serializer.validated_data['from_unit'])
+            # ConnectedUnit.objects.create(from_unit=device_unit, dest_hub=serializer.validated_data['dest_hub'], dest_device=serializer.validated_data['dest_device'], dest_unit=serializer.validated_data['dest_unit'])
+            return Response(request.data,
                             status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

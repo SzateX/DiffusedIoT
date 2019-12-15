@@ -555,7 +555,7 @@ class ConnectUnitHubSelectView(HubUserPassesTestMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         self.hubs = AuthServiceApi.get_hubs()
-        return super(ConnectUnitHubSelectView, self).get(*args, **kwargs)
+        return super(ConnectUnitHubSelectView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(ConnectUnitHubSelectView, self).get_context_data(**kwargs)
@@ -574,8 +574,8 @@ class ConnectUnitDeviceSelectView(HubUserPassesTestMixin, TemplateView):
         token = self.request.COOKIES.get(
             'user_token')
         self.hub = AuthServiceApi.get_hub(self.kwargs.get('dest_hub'))
-        self.devices = InternalApi.get_devices(token, self.hub['pk'])
-        return super(ConnectUnitDeviceSelectView, self).get(*args, **kwargs)
+        self.devices = InternalApi.get_devices(token, self.hub)
+        return super(ConnectUnitDeviceSelectView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(ConnectUnitDeviceSelectView, self).get_context_data(**kwargs)
@@ -594,9 +594,9 @@ class ConnectUnitSelectUnitView(HubUserPassesTestMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         token = self.request.COOKIES.get('user_token')
         self.hub = AuthServiceApi.get_hub(self.kwargs.get('dest_hub'))
-        self.device = InternalApi.get_device(token, self.hub['pk'], self.kwargs.get('dest_device'))
-        self.units = InternalApi.get_units(token, self.hub['pk'], self.device['pk'])
-        return super(ConnectUnitSelectUnitView, self).get(*args, **kwargs)
+        self.device = InternalApi.get_device(token, self.hub, self.kwargs.get('dest_device'))
+        self.units = InternalApi.get_units(token, self.hub, self.device['pk'])
+        return super(ConnectUnitSelectUnitView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(ConnectUnitSelectUnitView, self).get_context_data(**kwargs)
@@ -615,13 +615,13 @@ class ConnectedUnitList(HubUserPassesTestMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         token = self.request.COOKIES.get('user_token')
-        self.hub = AuthServiceApi.get_hub(self.kwargs.get('dest_hub'))
-        self.device = InternalApi.get_device(token, self.hub['pk'],
-                                             self.kwargs.get('dest_device'))
-        self.unit = InternalApi.get_unit(token, self.hub['pk'],
+        self.hub = AuthServiceApi.get_hub(self.kwargs.get('hub'))
+        self.device = InternalApi.get_device(token, self.hub,
+                                             self.kwargs.get('device'))
+        self.unit = InternalApi.get_unit(token, self.hub,
                                            self.device['pk'], self.kwargs.get('pk'))
         self.connected_units = InternalApi.get_connected_units_with_unit(token, self.hub, self.unit['pk'])
-        return super(ConnectedUnitList, self).get(*args, **kwargs)
+        return super(ConnectedUnitList, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(ConnectedUnitList, self).get_context_data(**kwargs)
@@ -642,9 +642,9 @@ class ConnectUnitConfirmView(HubUserPassesTestMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         token = self.request.COOKIES.get('user_token')
         self.hub = AuthServiceApi.get_hub(self.kwargs.get('dest_hub'))
-        self.device = InternalApi.get_device(token, self.hub['pk'],
+        self.device = InternalApi.get_device(token, self.hub,
                                              self.kwargs.get('dest_device'))
-        self.unit = InternalApi.get_unit(token, self.hub['pk'],
+        self.unit = InternalApi.get_unit(token, self.hub,
                                            self.device['pk'], self.kwargs.get('dest_unit'))
         context = self.get_context_data()
         return self.render_to_response(context)
@@ -653,10 +653,10 @@ class ConnectUnitConfirmView(HubUserPassesTestMixin, TemplateView):
         token = self.request.COOKIES.get('user_token')
         hub = AuthServiceApi.get_hub(self.kwargs.get('hub'))
         InternalApi.add_connected_unit(token, hub, {
-            'from_unit': self.kwargs.get('pk'),
-            'dest_hub': self.kwargs.get('dest_hub'),
-            'dest_device': self.kwargs.get('dest_device'),
-            'dest_unit': self.kwargs.get('dest_unit')
+            'from_unit': int(self.kwargs.get('pk')),
+            'dest_hub': int(self.kwargs.get('dest_hub')),
+            'dest_device': int(self.kwargs.get('dest_device')),
+            'dest_unit': int(self.kwargs.get('dest_unit'))
         })
         return HttpResponseRedirect(self.get_success_url())
 
@@ -668,4 +668,4 @@ class ConnectUnitConfirmView(HubUserPassesTestMixin, TemplateView):
         return context
 
     def get_success_url(self):
-        return '/dashboard/hub/%s/device/%s/units/%s/connected_units/' % (self.kwargs.get('hub'), self.kwargs.get('device'), self.kwargs.get('pk'))
+        return '/hub/dashboard/hub/%s/device/%s/units/%s/connected_units/' % (self.kwargs.get('hub'), self.kwargs.get('device'), self.kwargs.get('pk'))

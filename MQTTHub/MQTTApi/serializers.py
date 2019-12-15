@@ -16,8 +16,15 @@ class DeviceUnitSerializer(serializers.ModelSerializer):
 
 
 class ConnectedUnitSerializer(serializers.ModelSerializer):
-    from_unit = serializers.PrimaryKeyRelatedField()
+    from_unit = serializers.PrimaryKeyRelatedField(queryset=DeviceUnit.objects)
 
     class Meta:
         model = ConnectedUnit
         fields = ('pk', 'from_unit', 'dest_hub', 'dest_device', 'dest_unit')
+
+
+class ConnectedUnitSaveSerializer(serializers.Serializer):
+    from_unit = serializers.IntegerField()
+    dest_hub = serializers.IntegerField()
+    dest_device = serializers.IntegerField()
+    dest_unit = serializers.IntegerField()

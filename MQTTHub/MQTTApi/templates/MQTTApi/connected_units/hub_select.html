@@ -5,7 +5,7 @@
     <body>
     Connect unit - Select Hub<br><br>
     {% for dest_hub in hubs %}
-        <a href="{% url 'connect_unit_device_select' hub device pk dest_hub.pk%}">{{dest_hub}}</a><br>
+        <a href="{% url 'connect_unit_device_select' hub device pk dest_hub.pk %}">{{dest_hub}}</a><br>
     {% endfor %}
     </body>
 </html>

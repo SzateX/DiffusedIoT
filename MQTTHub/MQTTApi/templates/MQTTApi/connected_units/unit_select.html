@@ -9,7 +9,7 @@
     You selected device:<br>
     {{ device }} <br><br>
     {% for dest_unit in units %}
-        <a href="">{{dest_unit}}</a><br>
+        <a href="{% url 'connect_unit_confirm' view.kwargs.hub view.kwargs.device view.kwargs.pk hub.pk device.pk dest_unit.pk %}">{{dest_unit}}</a><br>
     {% endfor %}
     </body>
 </html>
