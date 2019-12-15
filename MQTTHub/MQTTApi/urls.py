@@ -23,5 +23,6 @@ urlpatterns = [
     url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<device>\d+)/units/(?P<pk>\d+)/connect_unit/$', v.ConnectUnitHubSelectView.as_view(), name='connect_unit_hub_select'),
     url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<device>\d+)/units/(?P<pk>\d+)/connect_unit/(?P<dest_hub>\d+)/$', v.ConnectUnitDeviceSelectView.as_view(), name='connect_unit_device_select'),
     url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<device>\d+)/units/(?P<pk>\d+)/connect_unit/(?P<dest_hub>\d+)/(?P<dest_device>\d+)/$', v.ConnectUnitSelectUnitView.as_view(), name='connect_unit_unit_select'),
-    url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<device>\d+)/units/(?P<pk>\d+)/connect_unit/(?P<dest_hub>\d+)/(?P<dest_device>\d+)/(?P<dest_unit>\d+)/$', v.ConnectUnitSelectUnitView.as_view(), name='connect_unit_unit_select'),
+    url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<device>\d+)/units/(?P<pk>\d+)/connect_unit/(?P<dest_hub>\d+)/(?P<dest_device>\d+)/(?P<dest_unit>\d+)/$', v.ConnectUnitConfirmView.as_view(), name='connect_unit_confirm'),
+    url(r'^dashboard/hub/(?P<hub>\d+)/device/(?P<device>\d+)/units/(?P<pk>\d+)/connected_units/$', v.ConnectedUnitList.as_view(), name='connected_unit_lists'),
 ] + api_urls.urlpatterns

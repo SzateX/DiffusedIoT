@@ -553,7 +553,7 @@ class ConnectUnitHubSelectView(HubUserPassesTestMixin, TemplateView):
     def test_func(self):
         return self.user['is_staff']
 
-    def get(self, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         self.hubs = AuthServiceApi.get_hubs()
         return super(ConnectUnitHubSelectView, self).get(*args, **kwargs)
 
@@ -570,7 +570,7 @@ class ConnectUnitDeviceSelectView(HubUserPassesTestMixin, TemplateView):
     def test_func(self):
         return self.user['is_staff']
 
-    def get(self, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         token = self.request.COOKIES.get(
             'user_token')
         self.hub = AuthServiceApi.get_hub(self.kwargs.get('dest_hub'))
@@ -591,7 +591,7 @@ class ConnectUnitSelectUnitView(HubUserPassesTestMixin, TemplateView):
     def test_func(self):
         return self.user['is_staff']
 
-    def get(self, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         token = self.request.COOKIES.get('user_token')
         self.hub = AuthServiceApi.get_hub(self.kwargs.get('dest_hub'))
         self.device = InternalApi.get_device(token, self.hub['pk'], self.kwargs.get('dest_device'))
@@ -604,3 +604,68 @@ class ConnectUnitSelectUnitView(HubUserPassesTestMixin, TemplateView):
         context['device'] = self.device
         context['units'] = self.units
         return context
+
+
+class ConnectedUnitList(HubUserPassesTestMixin, TemplateView):
+    login_url = '/hub/login/'
+    template_name = 'MQTTApi/connected_units/list.html'
+
+    def test_func(self):
+        return self.user['is_staff']
+
+    def get(self, request, *args, **kwargs):
+        token = self.request.COOKIES.get('user_token')
+        self.hub = AuthServiceApi.get_hub(self.kwargs.get('dest_hub'))
+        self.device = InternalApi.get_device(token, self.hub['pk'],
+                                             self.kwargs.get('dest_device'))
+        self.unit = InternalApi.get_unit(token, self.hub['pk'],
+                                           self.device['pk'], self.kwargs.get('pk'))
+        self.connected_units = InternalApi.get_connected_units_with_unit(token, self.hub, self.unit['pk'])
+        return super(ConnectedUnitList, self).get(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(ConnectedUnitList, self).get_context_data(**kwargs)
+        context['hub'] = self.hub
+        context['device'] = self.device
+        context['unit'] = self.unit
+        context['connected_units'] = self.connected_units
+        return context
+
+
+class ConnectUnitConfirmView(HubUserPassesTestMixin, TemplateView):
+    login_url = '/hub/login/'
+    template_name = 'MQTTApi/connected_units/confirm.html'
+
+    def test_func(self):
+        return self.user['is_staff']
+
+    def get(self, request, *args, **kwargs):
+        token = self.request.COOKIES.get('user_token')
+        self.hub = AuthServiceApi.get_hub(self.kwargs.get('dest_hub'))
+        self.device = InternalApi.get_device(token, self.hub['pk'],
+                                             self.kwargs.get('dest_device'))
+        self.unit = InternalApi.get_unit(token, self.hub['pk'],
+                                           self.device['pk'], self.kwargs.get('dest_unit'))
+        context = self.get_context_data()
+        return self.render_to_response(context)
+
+    def post(self, request, *args, **kwargs):
+        token = self.request.COOKIES.get('user_token')
+        hub = AuthServiceApi.get_hub(self.kwargs.get('hub'))
+        InternalApi.add_connected_unit(token, hub, {
+            'from_unit': self.kwargs.get('pk'),
+            'dest_hub': self.kwargs.get('dest_hub'),
+            'dest_device': self.kwargs.get('dest_device'),
+            'dest_unit': self.kwargs.get('dest_unit')
+        })
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        context = super(ConnectUnitConfirmView, self).get_context_data(**kwargs)
+        context['hub'] = self.hub
+        context['device'] = self.device
+        context['unit'] = self.unit
+        return context
+
+    def get_success_url(self):
+        return '/dashboard/hub/%s/device/%s/units/%s/connected_units/' % (self.kwargs.get('hub'), self.kwargs.get('device'), self.kwargs.get('pk'))

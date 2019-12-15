@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Connected Units</title>
+</head>
+<body>
+Connected units for:<br>
+{{ hub }} <br>
+{{ device }} <br>
+{{ unit }} <br><br><br>
+
+{% for connected_unit in connected_units %}
+    {{ connected_unit }} <br>
+{% endfor %}
+</body>
+</html>
