@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from MQTTApi.models import Device, DeviceUnit, ConnectedUnit
+from MQTTApi.models import Device, DeviceUnit, ConnectedUnit, \
+    TemperatureUnitValue
 
 
 class DeviceSerializer(serializers.ModelSerializer):
@@ -28,3 +29,15 @@ class ConnectedUnitSaveSerializer(serializers.Serializer):
     dest_hub = serializers.IntegerField()
     dest_device = serializers.IntegerField()
     dest_unit = serializers.IntegerField()
+
+
+class DataSerializer(serializers.Serializer):
+    device = serializers.PrimaryKeyRelatedField(queryset=Device.objects.all())
+    unit = serializers.PrimaryKeyRelatedField(queryset=DeviceUnit.objects.filter(device=device))
+    data = serializers.ListSerializer(child=serializers.CharField())
+
+
+class TemperatureUnitValueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TemperatureUnitValue
+        fields = ('value', 'unit', 'timestamp')
