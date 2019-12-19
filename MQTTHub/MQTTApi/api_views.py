@@ -2,6 +2,7 @@ import json
 
 import requests
 from django.http import Http404
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,6 +10,7 @@ from rest_framework.views import APIView
 from MQTTApi.mqtt_parser import mqtt_incoming
 from MQTTApi.services import AuthServiceApi
 from MQTTHub.settings import AUTH_SERVICE_ADDRESS, HUB_ID
+from drivers.GTS.driver import incoming_function
 from .models import Device, DeviceUnit, ConnectedUnit, TemperatureUnitValue
 from .serializers import DeviceSerializer, DeviceUnitSerializer, \
     ConnectedUnitSerializer, ConnectedUnitSaveSerializer, DataSerializer, \
@@ -214,20 +216,29 @@ class IncomingDataToUnitApiView(APIView):
         if serializer.is_valid():
             device = serializer.validated_data['device']
             unit = serializer.validated_data['unit']
-            data = json.loads(serializer.validated_data['data'])
-            if 'data' not in data or 'type' not in data:
-                return Response({'error': 'Invalid data'}, status=status.HTTP_400_BAD_REQUEST)
-            t = data['type']
-            data = json.loads(data['data'])
-            if t == 'TemperatureUnitValue':
-                serializer = TemperatureUnitValueSerializer(data=data)
-                if serializer.is_valid():
-                    obj = TemperatureUnitValue(device_unit=unit, incoming=True, **serializer.validated_data)
-                    mqtt_incoming(obj)
-                    return Response(request.data,
-                                    status=status.HTTP_200_OK)
-                return Response(serializer.errors,
+            data = serializer.validated_data['data']
+            objs = []
+            for data_obj in data:
+                try:
+                    d = json.loads(data_obj)
+                except Exception as e:
+                    pass
+                if 'data' not in d or 'type' not in d:
+                    return Response({'error': 'Invalid data'}, status=status.HTTP_400_BAD_REQUEST)
+                t = d['type']
+                d = json.loads(d['data'])
+                if t == 'TemperatureUnitValue':
+                    serializer = TemperatureUnitValueSerializer(data=d)
+                    if serializer.is_valid():
+                        obj = TemperatureUnitValue(device_unit=unit, incoming=True, **serializer.validated_data)
+                        objs.append(obj)
+                    else:
+                        return Response(serializer.errors,
+                                        status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    return Response({'error': 'Invalid type'},
                                     status=status.HTTP_400_BAD_REQUEST)
-            return Response({'error': 'Invalid type'},
-                            status=status.HTTP_400_BAD_REQUEST)
+            mqtt_incoming(device, unit, objs)
+            return Response(request.data,
+                            status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

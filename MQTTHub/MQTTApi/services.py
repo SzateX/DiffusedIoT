@@ -411,3 +411,13 @@ class InternalApi(object):
             raise Exception("Error in connection with InternalApi: "
                             + response.text)
         return response
+
+    @staticmethod
+    def send_data_to_unit(hub, data):
+        response = requests.post(
+            hub['private_address'] + "/hub/internal_api/connected_units/send_data/",
+            json=data
+        )
+        if response.status_code != 200:
+            raise Exception("Error in connection with InternalAPi: " + response.text)
+        return response

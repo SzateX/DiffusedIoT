@@ -2,26 +2,32 @@ import json
 
 from paho.mqtt import publish
 from rest_framework.renderers import JSONRenderer
+import paho.mqtt.client as mqtt
 
-from MQTTApi.serializers import TemperatureUnitValueSerializer
-from .models import Device, DeviceUnit, ConnectedUnit, TemperatureUnitValue
+from MQTTApi.services import InternalApi, AuthServiceApi
 from .enums import DeviceType
 from drivers.GTS.driver import driver_function
 from drivers.GTS.driver import incoming_function
 
+models = None
+serializers = None
+
+
 def mqtt_callback(client, userdata, message):
-    obj = json.loads(message)
-    if 'device' not in obj or 'unit' not in obj or 'data' in obj:
+    global models
+    global serializers
+    obj = json.loads(message.payload)
+    if 'device' not in obj or 'unit' not in obj or 'data' not in obj:
         return
 
-    device = Device.objects.get(pk=obj['device'])
-    unit = Device.objects.get(pk='unit', device=device)
+    device = models.Device.objects.get(pk=obj['device'])
+    unit = models.DeviceUnit.objects.get(pk=obj['unit'], device=device)
 
-    if unit.type_of_device == DeviceType.GENERIC_HUMIDITY_SENSOR:
+    if device.type_of_device == DeviceType.GENERIC_HUMIDITY_SENSOR:
         return
-    elif unit.type_of_device == DeviceType.GENERIC_TEMPERATURE_SENSOR:
-        objs = driver_function(obj['data'])
-    elif unit.type_of_device == DeviceType.GENERIC_LAMP:
+    elif device.type_of_device == DeviceType.GENERIC_TEMPERATURE_SENSOR:
+        objs = driver_function(models, unit, obj['data'])
+    elif device.type_of_device == DeviceType.GENERIC_LAMP:
         return
     else:
         return
@@ -29,24 +35,52 @@ def mqtt_callback(client, userdata, message):
     prepared_objs = []
 
     for o in objs:
-        saved_obj = o.save()
-        if isinstance(saved_obj, TemperatureUnitValue):
-            serializer_obj = JSONRenderer().render(TemperatureUnitValueSerializer(saved_obj).data)
+        o.save()
+        if isinstance(o, models.TemperatureUnitValue):
+            serializer_obj = json.dumps(serializers.TemperatureUnitValueSerializer(o).data)
             prepared_obj = {'data': serializer_obj,
                             'type': 'TemperatureUnitValue'}
-            prepared_objs.append(JSONRenderer().render(prepared_obj))
+            prepared_objs.append(json.dumps(prepared_obj))
 
-    raise NotImplementedError("TODO - dokończenie dodania API")
+    connected_units = models.ConnectedUnit.objects.filter(from_unit=unit)
+    for connected_unit in connected_units:
+        payload = {
+            'device': connected_unit.dest_device,
+            'unit': connected_unit.dest_unit,
+            'data': prepared_objs
+        }
+        hub = AuthServiceApi.get_hub(connected_unit.dest_hub)
+        InternalApi.send_data_to_unit(hub, payload)
 
 
-def mqtt_incoming(unit_value):
-    if isinstance(unit_value, TemperatureUnitValue):
-        obj = incoming_function(unit_value)
+def mqtt_incoming(device, unit, unit_values):
+    global models
+    global serializers
+
+    if device.type_of_device == DeviceType.GENERIC_TEMPERATURE_SENSOR:
+        obj = incoming_function(unit_values)
     else:
         return
-    unit_value.save()
-    obj['device'] = unit_value.device_unit.device.pk
-    obj['unit'] = unit_value.device_unit.pk
 
-    s = json.dumps('obj')
-    publish.single("inzynierkav2/sender", s, hostname="mqtt.eclipse.org")
+    for unit_value in unit_values:
+        unit_value.save()
+
+    obj['device'] = device.pk
+    obj['unit'] = unit.pk
+
+    s = json.dumps(obj)
+    client = mqtt.Client()
+
+    client.connect("test.mosquitto.org", 1883, 60)
+    client.publish('inzynierkav2/sender', payload=s)
+    client.disconnect()
+
+
+def set_models(models_module):
+    global models
+    models = models_module
+
+
+def set_serializers(serializer_module):
+    global serializers
+    serializers = serializer_module

@@ -33,7 +33,7 @@ class ConnectedUnitSaveSerializer(serializers.Serializer):
 
 class DataSerializer(serializers.Serializer):
     device = serializers.PrimaryKeyRelatedField(queryset=Device.objects.all())
-    unit = serializers.PrimaryKeyRelatedField(queryset=DeviceUnit.objects.filter(device=device))
+    unit = serializers.PrimaryKeyRelatedField(queryset=DeviceUnit.objects.all())
     data = serializers.ListSerializer(child=serializers.CharField())
 
 
