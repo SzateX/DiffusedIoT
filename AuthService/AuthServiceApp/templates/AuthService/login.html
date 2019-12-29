@@ -1,14 +1,8 @@
-<html>
-    <head>
-        <title>
-            AuthService - Logowanie
-        </title>
-    </head>
-    <body>
+{% extends 'AuthService/base.html' %}
+{% block content %}
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
             <input type="submit" value="Zaloguj">
         </form>
-    </body>
-</html>
+{% endblock %}

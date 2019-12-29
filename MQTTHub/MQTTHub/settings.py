@@ -135,3 +135,9 @@ REST_FRAMEWORK = {
 LOGIN_REDIRECT_URL = "/hub/dashboard/"
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "staticfolder")
+]
+
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfolder")

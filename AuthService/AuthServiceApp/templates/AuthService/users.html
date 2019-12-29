@@ -1,13 +1,9 @@
-<html>
-    <head>
-        <title>AuthService - Users</title>
-    </head>
-    <body>
+{% extends 'AuthService/base.html' %}
+{% block content %}
         <a href="{% url 'user_create' %}">Add user</a><br>
         List of users:<br>
         {% for user in users %}
             {{ user.username }} - <a href="{% url 'user_update' user.pk %}">Update</a>
             <a href="{% url 'user_delete' user.pk %}">Delete</a><br>
         {% endfor %}
-    </body>
-</html>
+{% endblock %}

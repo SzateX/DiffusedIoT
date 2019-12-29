@@ -1,8 +1,5 @@
-<html>
-    <head>
-        <title>AuthService - Hubs</title>
-    </head>
-    <body>
+{% extends 'AuthService/base.html' %}
+{% block content %}
         {% if has_api_key %}
             {% if created %}
                 <h1>Dodano Hub. API KEY to: {{ api_key }}</h1>
@@ -17,5 +14,4 @@
             <a href="{% url 'hub_reset_key' hub.pk %}">Reset Key</a>
             <br>
         {% endfor %}
-    </body>
-</html>
+{% endblock %}

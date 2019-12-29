@@ -1,8 +1,4 @@
-<html>
-    <head>
-        <title>AuthService - {{ user.username }}</title>
-    </head>
-    <body>
+{% extends 'AuthService/base.html' %}
+{% block content %}
         {{ user }}
-    </body>
-</html>
+{% endblock %}

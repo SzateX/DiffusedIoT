@@ -1,11 +1,7 @@
-<html>
-    <head>
-        <title>AuthService - Update Hub</title>
-    </head>
-    <body>
+{% extends 'AuthService/base.html' %}
+{% block content %}
         <form method="post">{% csrf_token %}
             {{ form.as_p }}
             <input type="submit" value="Update">
         </form>
-    </body>
-</html>
+{% endblock %}

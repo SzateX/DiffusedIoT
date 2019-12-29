@@ -1,10 +1,6 @@
-<html>
-    <head>
-        <title>AuthService - Devices</title>
-    </head>
-    <body>
-        {% for device in devices %}
-            <a href="{%  url 'units' hub=device.hub.pk device=device.pk%}">{{ device.name }} {{ device.type_of_device }}</a> <br>
-        {% endfor %}
-    </body>
-</html>
+{% extends 'AuthService/base.html' %}
+{% block content %}
+{% for device in devices %}
+   <a href="{%  url 'units' hub=device.hub.pk device=device.pk%}">{{ device.name }} {{ device.type_of_device }}</a> <br>
+{% endfor %}
+{% endblock %}
