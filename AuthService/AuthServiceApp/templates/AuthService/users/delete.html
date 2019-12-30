@@ -1,7 +1,10 @@
 {% extends 'AuthService/base.html' %}
 {% block content %}
+        <h3>Removing user</h3>
         <form method="post">{% csrf_token %}
-            Remove?
-            <input type="submit" value="Delete">
+            Remove user - {{user.username}}?<br><br>
+            <button class="btn waves-effect waves-light" type="submit" name="action">Delete
+                <i class="material-icons right">send</i>
+            </button>
         </form>
 {% endblock %}

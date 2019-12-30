@@ -20,5 +20,13 @@ urlpatterns = [
     #     v.DeviceUnitsView.as_view(), name='units'),
     url(r'^dashboard/login/$', v.UserLoginView.as_view(), name='login'),
     url(r'^dashboard/logout/$', v.UserLogoutView.as_view(), name='logout'),
+                  url(r'^dashboard/groups/$', v.GroupsView.as_view(),
+                      name='groups'),
+                  url(r'^dashboard/groups/create/$', v.GroupCreateView.as_view(),
+                      name='group_create'),
+                  url(r'^dashboard/groups/(?P<pk>\d+)/update/$',
+                      v.GroupUpdateView.as_view(), name='group_update'),
+                  url(r'^dashboard/groups/(?P<pk>\d+)/delete/$',
+                      v.GroupDeleteView.as_view(), name='group_delete'),
 
 ] + api_urls.api_url_patterns

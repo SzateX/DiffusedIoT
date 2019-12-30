@@ -1,17 +1,31 @@
 {% extends 'AuthService/base.html' %}
 {% block content %}
+        <h3>Hubs</h3>
         {% if has_api_key %}
             {% if created %}
-                <h1>Dodano Hub. API KEY to: {{ api_key }}</h1>
+                <h5>Added Hub. API KEY is: {{ api_key }}</h5>
             {% else %}
-                <h1>Zmieniono API KEY na: {{ api_key }}</h1>
+                <h5>Changed API KEY: {{ api_key }}</h5>
             {% endif %}
         {% endif %}
-        <a href="{% url 'hub_create' %}">Add Hub</a><br><br>
-        {% for hub in hubs %}
-            <a href="{% url 'hub_details' hub.pk %}">{{ hub.pk }} {{ hub.name }} {{ hub.private_address }} {{ hub.public_address }}</a>
-            <a href="{% url 'hub_update' hub.pk %}">Edit</a> <a href="{% url 'hub_delete' hub.pk %}">Delete</a>
-            <a href="{% url 'hub_reset_key' hub.pk %}">Reset Key</a>
-            <br>
-        {% endfor %}
+        <div class="row">
+            <a href="{% url 'hub_create' %}" class="waves-effect waves-light btn-small">Add Hub<i class="material-icons right">add</i></a><br>
+            <table>
+                <thead><tr><th>Id</th><th>Name</th><th>Public Address</th><th>Private Address</th><th>Actions</th></tr></thead>
+                <tbody>
+                    {% for hub in hubs %}
+                    <tr>
+                        <td><a href="{% url 'hub_details' hub.pk %}">{{ hub.pk }}</a></td>
+                        <td>{{ hub.name }}</td>
+                        <td>{{ hub.public_address }}</td>
+                        <td>{{ hub.private_address }}</td>
+                        <td><a href="{% url 'hub_update' hub.pk %}" class="waves-effect waves-light btn">Update <i class="small material-icons">edit</i></a>
+                        <a href="{% url 'hub_delete' hub.pk %}" class="waves-effect waves-light btn">Delete <i class="small material-icons">remove_circle</i></a>
+                        <a href="{% url 'hub_reset_key' hub.pk %}" class="waves-effect waves-light btn">Reset Key <i class="small material-icons">loop</i></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 {% endblock %}

@@ -1,12 +1,10 @@
 {% extends 'AuthService/base.html' %}
 {% block content %}
-    <h3>User Update</h3>
-    <div class="row">
+        <h3>Removing user</h3>
         <form method="post">{% csrf_token %}
-            {{ form.as_p }}
-            <button class="btn waves-effect waves-light" type="submit" name="action">Update
+            Remove group - {{group.name}}?<br><br>
+            <button class="btn waves-effect waves-light" type="submit" name="action">Delete
                 <i class="material-icons right">send</i>
             </button>
         </form>
-    </div>
 {% endblock %}

@@ -1,9 +1,18 @@
 {% extends 'AuthService/base.html' %}
 {% block content %}
-        <a href="{% url 'user_create' %}">Add user</a><br>
-        List of users:<br>
-        {% for user in users %}
-            {{ user.username }} - <a href="{% url 'user_update' user.pk %}">Update</a>
-            <a href="{% url 'user_delete' user.pk %}">Delete</a><br>
-        {% endfor %}
+        <h3>Users</h3>
+        <div class="row">
+            <a href="{% url 'user_create' %}" class="waves-effect waves-light btn-small">Add User<i class="material-icons right">add</i></a><br>
+            <table>
+                <thead><tr><th>Username</th><th>Actions</th></tr></thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.username }}</td> <td><a href="{% url 'user_update' user.pk %}" class="waves-effect waves-light btn">Update <i class="small material-icons">edit</i></a>
+                        <a href="{% url 'user_delete' user.pk %}" class="waves-effect waves-light btn">Delete <i class="small material-icons">remove_circle</i></a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 {% endblock %}

@@ -14,7 +14,7 @@
 <body>
   <nav>
     <div class="nav-wrapper container">
-      <a href="#" class="brand-logo">AuthService -&nbsp;Dashboard</a>
+      <a href="{% url 'dashboard' %}" class="brand-logo">AuthService -&nbsp;Dashboard</a>
         {% if user.is_authenticated %}
         <ul id="nav-mobile" class="right hide-on-med-and-down">
             <li><a href="{% url 'logout' %}">Logout</a></li>
@@ -26,6 +26,12 @@
     {% block content %}
     {% endblock %}
   </div>
-    <script type="text/javascript" src="{% static 'dashboard/js/materialize.js' %}"></script>
+  <script type="text/javascript" src="{% static 'dashboard/js/materialize.js' %}"></script>
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+        var elems = document.querySelectorAll('select');
+        var instances = M.FormSelect.init(elems, {});
+        });
+    </script>
 </body>
 </html>

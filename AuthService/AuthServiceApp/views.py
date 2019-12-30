@@ -2,7 +2,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 # Create your views here.
@@ -84,6 +84,63 @@ class UserDeleteView(UserPassesTestMixin, DeleteView):
     template_name = "AuthService/users/delete.html"
     model = User
     success_url = "/authService/dashboard/users"
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+
+class GroupsView(UserPassesTestMixin, ListView):
+    login_url = LOGIN_URL
+    permission_denied_message = PERMISSION_DENIED_MESSAGE
+    template_name = "AuthService/groups.html"
+    model = Group
+    context_object_name = 'groups'
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+
+class GroupView(UserPassesTestMixin, DetailView):
+    login_url = LOGIN_URL
+    permission_denied_message = PERMISSION_DENIED_MESSAGE
+    template_name = "AuthService/groups/detail.html"
+    model = Group
+    context_object_name = 'group'
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+
+class GroupCreateView(UserPassesTestMixin, CreateView):
+    login_url = LOGIN_URL
+    permission_denied_message = PERMISSION_DENIED_MESSAGE
+    template_name = "AuthService/groups/create.html"
+    success_url = "/authService/dashboard/groups"
+    model = Group
+    fields = ('name', )
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+
+class GroupUpdateView(UserPassesTestMixin, UpdateView):
+    login_url = LOGIN_URL
+    permission_denied_message = PERMISSION_DENIED_MESSAGE
+    model = Group
+    fields = ('name', )
+    template_name = "AuthService/groups/update.html"
+    success_url = "/authService/dashboard/groups"
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+
+class GroupDeleteView(UserPassesTestMixin, DeleteView):
+    login_url = LOGIN_URL
+    permission_denied_message = PERMISSION_DENIED_MESSAGE
+    template_name = "AuthService/groups/delete.html"
+    model = Group
+    success_url = "/authService/dashboard/groups"
 
     def test_func(self):
         return self.request.user.is_staff
