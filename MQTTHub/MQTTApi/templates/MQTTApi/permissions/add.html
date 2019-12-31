@@ -1,11 +1,10 @@
-<html>
-    <head>
-        <title>Add Rule</title>
-    </head>
-    <body>
+{% extends 'MQTTApi/base.html' %}
+{% block content %}
+    <h3>{% if update %}Updating{% else %}Adding{% endif %} {% if group %}Group{% else %}User{% endif %} Permission</h3>
         <form method="post">{% csrf_token %}
             {{ form.as_p }}
-            <input type="submit" value="Add">
+            <button class="btn waves-effect waves-light" type="submit" name="action">Submit
+                <i class="material-icons right">send</i>
+            </button>
         </form>
-    </body>
-</html>
+{% endblock %}

@@ -1,5 +1,20 @@
 {% extends 'AuthService/base.html' %}
 {% block content %}
-        {{ hub }}
-    </body>
+        <h3>Hub Details</h3>
+        <div class="row">
+                Id: {{hub.pk}}<br>
+                Name: {{hub.name}}<br>
+                Private Address: {{hub.private_address}}<br>
+                Public Address: {{hub.public_address}}
+        </div>
+        <div class="row">
+                <h5>IDs of Registred Devices for this Hub:</h5>
+                {% for device in hub.registred_devices.all %}
+                    {% if forloop.last %}
+                        {{ device.pk }}
+                    {% else %}
+                        {{ device.pk }},
+                    {% endif %}
+                {% endfor %}
+        </div>
 {% endblock %}

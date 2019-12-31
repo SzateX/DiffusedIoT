@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hub - dashboard</title>
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="{% static 'dashboard/css/materialize.css' %}"  media="screen,projection"/>
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style>
+        label{
+            color: #558b2f;
+        }
+        input[type="text"]:not(.browser-default){
+            border-bottom: 1px solid #558b2f;
+        }
+    </style>
+</head>
+<body>
+  <nav class="light-green darken-3">
+    <div class="nav-wrapper container">
+      <a href="{% url 'hub_dashboard' %}" class="brand-logo">AuthService -&nbsp;Hub</a>
+        {% if request.COOKIES.user_token %}
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li><a href="{% url 'hub_logout' %}">Logout</a></li>
+        </ul>
+        {% endif %}
+    </div>
+    </nav>
+  <div class="container">
+    {% block content %}
+    {% endblock %}
+  </div>
+  <script type="text/javascript" src="{% static 'dashboard/js/materialize.js' %}"></script>
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+        var elems = document.querySelectorAll('select');
+        var instances = M.FormSelect.init(elems, {});
+        });
+    </script>
+</body>
+</html>

@@ -1,19 +1,75 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Rules List</title>
-</head>
-<body>
-    {{device}}<br><br>
-    User rules <a href="{% url 'add_user_permission' hub device.pk %}">Add Rule</a>:<br>
-    {% for user_perm in user_permissions %}
-        {{user_perm}} <a href="{% url 'update_user_permission' hub device.pk user_perm.pk %}">Edit</a> <a href="{% url 'delete_user_permission' hub device.pk user_perm.pk %}">Delete</a><br>
-    {% endfor %}
-    <br><br>
-    Group rules <a href="{% url 'add_group_permission' hub device.pk %}">Add Rule</a>:<br>
-    {% for group_perm in group_permissions %}
-        {{group_perm}} <a href="{% url 'update_group_permission' hub device.pk group_perm.pk %}">Edit</a> <a href="{% url 'delete_group_permission' hub device.pk group_perm.pk %}">Delete</a><br>
-    {% endfor %}
-</body>
-</html>
+{% extends 'MQTTApi/base.html' %}
+{% block content %}
+    <h3>Acces Rules for Device:</h3>
+    <div class="row">
+        Id: {{ device.pk }}<br>
+        Name: {{ device.name }}<br>
+        Type of Device: {{ device.type_of_device }}<br>
+    </div>
+    <div class="row">
+        <h5>User rules</h5>
+        <a href="{% url 'add_user_permission' hub device.pk %}"
+           class="waves-effect waves-light btn-small">Add Rule<i
+                class="material-icons right">add</i></a><br>
+        <table>
+            <thead>
+            <tr>
+                <th>User</th>
+                <th>Read Permission</th>
+                <th>Write Permission</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for user_perm in user_permissions %}
+                <tr>
+                    <td>{{ user_perm.user.username }}</td>
+                    <td>{{ user_perm.read_permission }}</td>
+                    <td>{{ user_perm.write_permission }}</td>
+                    <td>
+                        <a href="{% url 'update_user_permission' hub device.pk user_perm.pk %}"
+                           class="waves-effect waves-light btn">Edit <i
+                                class="small material-icons">edit</i></a>
+                        <a href="{% url 'delete_user_permission' hub device.pk user_perm.pk %}"
+                           class="waves-effect waves-light btn">Delete <i
+                                class="small material-icons">remove_circle</i></a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="row">
+        <h5>Group rules</h5>
+        <a href="{% url 'add_group_permission' hub device.pk %}"
+           class="waves-effect waves-light btn-small">Add Rule<i
+                class="material-icons right">add</i></a><br>
+        <table>
+            <thead>
+            <tr>
+                <th>Group</th>
+                <th>Read Permission</th>
+                <th>Write Permission</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for group_perm in group_permissions %}
+                <tr>
+                    <td>{{ group_perm.group.name }}</td>
+                    <td>{{ group_perm.read_permission }}</td>
+                    <td>{{ group_perm.write_permission }}</td>
+                    <td>
+                    <a href="{% url 'update_group_permission' hub device.pk group_perm.pk %}"
+                       class="waves-effect waves-light btn">Edit <i
+                                class="small material-icons">edit</i></a>
+                    <a href="{% url 'delete_group_permission' hub device.pk group_perm.pk %}"
+                       class="waves-effect waves-light btn">Delete <i
+                                class="small material-icons">remove_circle</i></a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

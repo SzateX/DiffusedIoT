@@ -73,6 +73,16 @@ class HubLoginView(FormView):
         )
         return redirect_to if url_is_safe else ''
 
+    def get(self, request, *args, **kwargs):
+        if 'user_token' in request.COOKIES:
+            del request.COOKIES['user_token']
+        if 'refresh_token' in request.COOKIES:
+            del request.COOKIES['refresh_token']
+        response = super(HubLoginView, self).get(request, *args, **kwargs)
+        response.delete_cookie("user_token")
+        response.delete_cookie("refresh_token")
+        return response
+
     def get_success_url(self):
         url = self.get_redirect_url()
         return url or resolve_url(settings.LOGIN_REDIRECT_URL)
@@ -112,12 +122,14 @@ class HubDeviceView(HubLoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         hub = AuthServiceApi.get_hub(int(kwargs.get('hub')))
+        self.hub = hub
         self.devices = InternalApi.get_devices(self.request.COOKIES.get('user_token'), hub)
         return super(HubDeviceView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(HubDeviceView, self).get_context_data(**kwargs)
         context['devices'] = self.devices
+        context['hub'] = self.hub
         return context
 
 
@@ -148,6 +160,7 @@ class UpdateDeviceView(HubUserPassesTestMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super(UpdateDeviceView, self).get_context_data(**kwargs)
         context['form'] = self.get_form_class()(initial=self.object)
+        context['update'] = True
         return context
 
     def get(self, request, *args, **kwargs):
@@ -278,6 +291,7 @@ class AddDeviceGroupPermissionView(HubUserPassesTestMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super(AddDeviceGroupPermissionView, self).get_context_data(**kwargs)
         # context['form'] = self.get_form_class()(group_list=self.groups)
+        context['group'] = True
         return context
 
     def form_valid(self, form):
@@ -331,6 +345,7 @@ class UpdateDeviceUserPermissionView(HubUserPassesTestMixin, FormView):
         context = super(UpdateDeviceUserPermissionView, self).get_context_data(
             **kwargs)
         # context['form'] = self.get_form_class()(user_list=self.users)
+        context['update'] = True
         return context
 
     def get_form(self, form_class=None):
@@ -391,6 +406,8 @@ class UpdateDeviceGroupPermissionView(HubUserPassesTestMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super(UpdateDeviceGroupPermissionView, self).get_context_data(**kwargs)
         # context['form'] = self.get_form_class()(group_list=self.groups)
+        context['update'] = True
+        context['group'] = True
         return context
 
     def form_valid(self, form):

@@ -1,11 +1,18 @@
-<html>
-    <head>
-        <title>Dasboard</title>
-    </head>
-    <body>
-        <a href="{% url 'hub_logout' %}">Logout</a><br><br>
-        {% for hub in hubs %}
-            <a href="{% url 'hub_devices' hub.pk %}">{{ hub.name }} {{ hub.public_address }} {{ hub.private_address }}</a>
-        {% endfor %}
-    </body>
-</html>
+{% extends 'MQTTApi/base.html' %}
+{% block content %}
+        <h3>Hubs Network:</h3>
+        <div class="row">
+                <table>
+                    <thead><tr><th>Name</th><th>Public Address</th><th>Private Address</th></tr></thead>
+                    <tbody>
+                        {% for hub in hubs %}
+                        <tr>
+                            <td><a href="{% url 'hub_devices' hub.pk %}">{{ hub.name }}</a></td>
+                            <td>{{ hub.public_address }}</td>
+                            <td>{{ hub.private_address }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+{% endblock %}

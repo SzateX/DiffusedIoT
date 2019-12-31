@@ -1,11 +1,42 @@
-<html>
-    <head>
-        <title>Devices</title>
-    </head>
-    <body>
-        <a href="{% url 'hub_devices_add' hub %}">Dodaj urządzenie</a><br><br>
+{% extends 'MQTTApi/base.html' %}
+{% block content %}
+    <h3>Registered Devices for Hub:</h3>
+    <div class="row">
+        Id: {{ hub.pk }}<br>
+        Name: {{ hub.name }}<br>
+        Private Address: {{ hub.private_address }}<br>
+        Public Address: {{ hub.public_address }}
+    </div>
+    <a href="{% url 'hub_devices_add' hub.pk %}"
+       class="waves-effect waves-light btn-small">Add Device<i
+            class="material-icons right">add</i></a><br>
+    <table>
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Type of Device</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
         {% for device in devices %}
-            <a href="{% url 'device_units' hub device.pk %}">{{ device }}</a> <a href="{% url 'hub_devices_update' hub device.pk %}">Edytuj urządzenie</a> <a href="{% url 'hub_device_permissions' hub device.pk %}">Reguły dostępu</a><br>
+            <tr>
+                <td>
+                    <a href="{% url 'device_units' hub.pk device.pk %}">{{ device.pk }}</a>
+                </td>
+                <td>
+                    <a href="{% url 'device_units' hub.pk device.pk %}">{{ device.name }}</a>
+                </td>
+                <td>{{ device.type_of_device }}</td>
+                <td><a href="{% url 'hub_devices_update' hub.pk device.pk %}"
+                       class="waves-effect waves-light btn">Edit Device <i
+                        class="small material-icons">edit</i></a>
+                    <a href="{% url 'hub_device_permissions' hub.pk device.pk %}"
+                       class="waves-effect waves-light btn">Access Rules <i
+                            class="small material-icons">security</i></a></td>
+            </tr>
         {% endfor %}
-    </body>
-</html>
+        </tbody>
+    </table>
+{% endblock %}

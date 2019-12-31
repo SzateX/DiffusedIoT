@@ -1,4 +1,13 @@
 {% extends 'AuthService/base.html' %}
 {% block content %}
-        {{ group }}
+        <h3>Group Details</h3>
+        <div class="row">
+                Name: {{group.name}}<br>
+        </div>
+        <div class="row">
+                <h5>Users belong to this group:</h5>
+                {% for user in group.users.all %}
+                <a href="{% url 'user_detail' user.pk %}">{{user.username}}</a><br>
+                {% endfor %}
+        </div>
 {% endblock %}

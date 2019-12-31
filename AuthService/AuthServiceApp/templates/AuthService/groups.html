@@ -8,7 +8,7 @@
                 <tbody>
                     {% for group in groups %}
                     <tr>
-                        <td>{{ group.name }}</td> <td><a href="{% url 'group_update' group.pk %}" class="waves-effect waves-light btn">Update <i class="small material-icons">edit</i></a>
+                        <td><a href="{% url 'group_detail' group.pk %}">{{ group.name }}</a></td> <td><a href="{% url 'group_update' group.pk %}" class="waves-effect waves-light btn">Update <i class="small material-icons">edit</i></a>
                         <a href="{% url 'group_delete' group.pk %}" class="waves-effect waves-light btn">Delete <i class="small material-icons">remove_circle</i></a></td>
                     </tr>
                     {% endfor %}

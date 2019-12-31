@@ -1,5 +1,20 @@
 {% extends 'AuthService/base.html' %}
 {% block content %}
         <h3>User Details</h3>
-        {{ user }}
+        <div class="row">
+                Username: {{user.username}}<br>
+                Last Login: {{user.last_login}}<br>
+                Superuser status: {{user.is_superuser}}<br>
+                Is Active: {{user.is_active}}<br>
+                Is Staff: {{user.is_staff}}<br>
+                Email: {{user.email}}<br><br>
+                First Name: {{user.first_name}}<br>
+                Last Name: {{user.last_name}}
+        </div>
+        <div class="row">
+                <h5>User belongs to this groups:</h5>
+                {% for group in user.groups.all %}
+                <a href="{% url 'group_detail' group.pk %}">{{group.name}}</a><br>
+                {% endfor %}
+        </div>
 {% endblock %}

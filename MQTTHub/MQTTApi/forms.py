@@ -32,8 +32,8 @@ class HubDeviceForm(forms.Form):
 
 
 class UserPermissionForm(forms.Form):
-    read_permission = forms.BooleanField(required=False)
-    write_permission = forms.BooleanField(required=False)
+    read_permission = forms.BooleanField(required=False, help_text="This allow user to display device.")
+    write_permission = forms.BooleanField(required=False, help_text="This allow to write data to units.")
     user = forms.TypedChoiceField(coerce=int)
 
     def __init__(self, user_list=None, *args, **kwargs):
@@ -44,8 +44,8 @@ class UserPermissionForm(forms.Form):
 
 
 class GroupPermissionForm(forms.Form):
-    read_permission = forms.BooleanField(required=False)
-    write_permission = forms.BooleanField(required=False)
+    read_permission = forms.BooleanField(required=False, help_text="This allow user to display device.")
+    write_permission = forms.BooleanField(required=False, help_text="This allow to write data to units.")
     group = forms.TypedChoiceField(coerce=int)
 
     def __init__(self, group_list=None, *args, **kwargs):
