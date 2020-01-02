@@ -1,11 +1,18 @@
-<html>
-    <head>
-        <title>Connect Unit - Select Hub</title>
-    </head>
-    <body>
-    Connect unit - Select Hub<br><br>
-    {% for dest_hub in hubs %}
-        <a href="{% url 'connect_unit_device_select' hub device pk dest_hub.pk %}">{{dest_hub}}</a><br>
-    {% endfor %}
-    </body>
-</html>
+{% extends 'MQTTApi/base.html' %}
+{% block content %}
+    <h3>Connect unit - Select Hub</h3>
+    <div class="row">
+                <table>
+                    <thead><tr><th>Name</th><th>Public Address</th><th>Private Address</th></tr></thead>
+                    <tbody>
+                        {% for dest_hub in hubs %}
+                        <tr>
+                            <td><a href="{% url 'connect_unit_device_select' hub device pk dest_hub.pk %}">{{ dest_hub.name }}</a></td>
+                            <td>{{ dest_hub.public_address }}</td>
+                            <td>{{ dest_hub.private_address }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+{% endblock %}

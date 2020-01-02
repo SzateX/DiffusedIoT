@@ -1,12 +1,44 @@
-<html>
-    <head>
-        <title>List of Units</title>
-    </head>
-    <body>
-        {{ device }}<br><br><br>
-        <a href="{% url 'add_device_unit' hub device.pk %}">Add Unit</a><br>
+{% extends 'MQTTApi/base.html' %}
+{% block content %}
+    <h3>Units for Device:</h3>
+    <div class="row">
+        Id: {{ device.pk }}<br>
+        Name: {{ device.name }}<br>
+        Type Of Device: {{ device.type_of_device }}
+    </div>
+    <a href="{% url 'add_device_unit' hub device.pk %}"
+       class="waves-effect waves-light btn-small">Add Unit<i
+            class="material-icons right">add</i></a>
+    <table>
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Direction</th>
+            <th>Type Of Unit</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
         {% for unit in units %}
-            {{ unit }} <a href="{% url 'update_device_unit' hub device.pk unit.pk %}">Edit Unit</a> <a href="{% url 'delete_device_unit' hub device.pk unit.pk %}">Delete Unit</a> <a href="{% url 'connected_unit_lists' hub device.pk unit.pk %}">Connected Units</a><br><br>
+            <tr>
+                <td>{{ unit.pk }}</td>
+                <td>{{ unit.name }}</td>
+                <td>{{ unit.direction }}</td>
+                <td>{{ unit.type_of_unit }}</td>
+                <td>
+                    <a href="{% url 'update_device_unit' hub device.pk unit.pk %}"
+                       class="waves-effect waves-light btn">Edit Unit <i
+                        class="small material-icons">edit</i></a>
+                    <a href="{% url 'delete_device_unit' hub device.pk unit.pk %}"
+                       class="waves-effect waves-light btn">Delete Unit <i
+                                class="small material-icons">remove_circle</i></a>
+                    <a href="{% url 'connected_unit_lists' hub device.pk unit.pk %}"
+                       class="waves-effect waves-light btn">Connected Units <i
+                                class="small material-icons">power</i></a>
+                </td>
+            </tr>
         {% endfor %}
-    </body>
-</html>
+        </tbody>
+    </table>
+{% endblock %}

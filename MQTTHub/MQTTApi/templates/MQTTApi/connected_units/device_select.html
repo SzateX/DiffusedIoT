@@ -1,13 +1,33 @@
-<html>
-    <head>
-        <title>Connect Unit - Select DEvice</title>
-    </head>
-    <body>
-    Connect unit - Select Device<br><br>
-    You selected hub:<br>
-    {{ hub }} <br><br>
-    {% for dest_device in devices %}
-        <a href="{% url 'connect_unit_unit_select' view.kwargs.hub view.kwargs.device view.kwargs.pk hub.pk dest_device.pk %}">{{dest_device}}</a><br>
-    {% endfor %}
-    </body>
-</html>
+{% extends 'MQTTApi/base.html' %}
+{% block content %}
+    <h3>Connect unit - Select Device</h3>
+    <div class="row">
+        <h5>You selected hub:</h5>
+        Id: {{ hub.pk }}<br>
+        Name: {{ hub.name }}<br>
+        Private Address: {{ hub.private_address }}<br>
+        Public Address: {{ hub.public_address }}
+    </div>
+    <table>
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Type of Device</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for dest_device in devices %}
+            <tr>
+                <td>
+                    <a href="{% url 'connect_unit_unit_select' view.kwargs.hub view.kwargs.device view.kwargs.pk hub.pk dest_device.pk %}">{{ dest_device.pk }}</a>
+                </td>
+                <td>
+                    <a href="{% url 'connect_unit_unit_select' view.kwargs.hub view.kwargs.device view.kwargs.pk hub.pk dest_device.pk %}">{{ dest_device.name }}</a>
+                </td>
+                <td>{{ dest_device.type_of_device }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

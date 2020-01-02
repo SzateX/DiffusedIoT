@@ -1,18 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Connected Units - Confirm Connect</title>
-</head>
-<body>
-Do you wish to connect to this unit?:<br>
-{{ hub }} <br>
-{{ device }} <br>
-{{ unit }} <br><br><br>
+{% extends 'MQTTApi/base.html' %}
+{% block content %}
+    <h3>Do you wish to connect to this unit?:</h3>
+    <div class="row">
+        <h5>Hub:</h5>
+        Id: {{ hub.pk }}<br>
+        Name: {{ hub.name }}<br>
+        Private Address: {{ hub.private_address }}<br>
+        Public Address: {{ hub.public_address }}
+    </div>
+    <div class="row">
+        <h5>Device:</h5>
+        Id: {{ device.pk }}<br>
+        Name: {{ device.name }}<br>
+        Type Of Device: {{ device.type_of_device }}
+    </div>
+        <div class="row">
+        <h5>Unit:</h5>
+        Id: {{ unit.pk }}<br>
+        Name: {{ unit.name }}<br>
+        Direction: {{ unit.direction }}<br>
+        Type Of Unit: {{ unit.type_of_unit }}
+    </div>
 
 <form method="post">
     {% csrf_token %}
-    <input type="submit" value="Connect">
+    <button class="btn waves-effect waves-light" type="submit" name="action">Connect
+                <i class="material-icons right">send</i>
+            </button>
 </form>
-</body>
-</html>
+{% endblock %}

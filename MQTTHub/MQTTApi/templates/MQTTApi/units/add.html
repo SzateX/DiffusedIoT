@@ -1,11 +1,9 @@
-<html>
-    <head>
-        <title>Add Unit</title>
-    </head>
-    <body>
-        <form method="post">{% csrf_token %}
+{% extends 'MQTTApi/base.html' %}
+{% block content %}
+        <h3>{% if update %}Updating{% else %}Adding{% endif %} Unit</h3>
             {{ form.as_p }}
-            <input type="submit" value="Add">
+            <button class="btn waves-effect waves-light" type="submit" name="action">Submit
+                <i class="material-icons right">send</i>
+            </button>
         </form>
-    </body>
-</html>
+{% endblock %}

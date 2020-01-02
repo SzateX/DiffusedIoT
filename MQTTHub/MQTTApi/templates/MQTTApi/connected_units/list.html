@@ -1,17 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Connected Units</title>
-</head>
-<body>
-Connected units for:<br>
-{{ hub }} <br>
-{{ device }} <br>
-{{ unit }} <br><br><br>
-<a href="{% url 'connect_unit_hub_select' hub.pk device.pk unit.pk %}">Connect Unit</a>
-{% for connected_unit in connected_units %}
-    {{ connected_unit }} <br>
-{% endfor %}
-</body>
-</html>
+{% extends 'MQTTApi/base.html' %}
+{% block content %}
+    <h3>Connected units for:</h3>
+    <div class="row">
+        <h5>Hub:</h5>
+        Id: {{ hub.pk }}<br>
+        Name: {{ hub.name }}<br>
+        Private Address: {{ hub.private_address }}<br>
+        Public Address: {{ hub.public_address }}
+    </div>
+    <div class="row">
+        <h5>Device:</h5>
+        Id: {{ device.pk }}<br>
+        Name: {{ device.name }}<br>
+        Type Of Device: {{ device.type_of_device }}
+    </div>
+        <div class="row">
+        <h5>Unit:</h5>
+        Id: {{ unit.pk }}<br>
+        Name: {{ unit.name }}<br>
+        Direction: {{ unit.direction }}<br>
+        Type Of Unit: {{ unit.type_of_unit }}
+    </div>
+    <a href="{% url 'connect_unit_hub_select' hub.pk device.pk unit.pk %}"
+       class="waves-effect waves-light btn-small">Connect Unit<i
+            class="material-icons right">power</i></a>
+    <table>
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Destination Hub</th>
+            <th>Destination Device</th>
+            <th>Destination Unit</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for connected_unit in connected_units %}
+                <tr>
+                    <td>{{ connected_unit.from_unit }}</td>
+                    <td>{{ connected_unit.dest_hub }}</td>
+                    <td>{{ connected_unit.dest_device }}</td>
+                    <td>{{ connected_unit.dest_unit }}</td>
+                </tr>
+            {% endfor %}
+{% endblock %}
