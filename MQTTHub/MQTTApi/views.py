@@ -2,7 +2,7 @@ import requests
 from django.contrib.auth.mixins import AccessMixin
 from django.contrib.auth.views import redirect_to_login
 from django.http import HttpResponseRedirect
-from django.shortcuts import resolve_url, redirect
+from django.shortcuts import resolve_url, redirect, render
 from django.utils.http import is_safe_url
 from django.views.generic import FormView, TemplateView, RedirectView
 
@@ -11,6 +11,16 @@ from MQTTHub import settings
 from MQTTHub.settings import AUTH_SERVICE_ADDRESS
 from MQTTApi.forms import HubAuthorizationForm, HubDeviceForm, \
     UserPermissionForm, GroupPermissionForm, UnitForm
+
+
+def handler500(request):
+    if 'user_token' in request.COOKIES:
+        del request.COOKIES['user_token']
+    if 'refresh_token' in request.COOKIES:
+        del request.COOKIES['refresh_token']
+    response = render(request, '500.html', status=500)
+    response.delete_cookie("user_token")
+    response.delete_cookie("refresh_token")
 
 
 class HubLoginRequiredMixin(AccessMixin):
@@ -147,6 +157,23 @@ class AddDeviceView(HubUserPassesTestMixin, FormView):
 
     def test_func(self):
         return self.user['is_staff']
+
+    def get_success_url(self):
+        return '/hub/dashboard/hub/%d/' % int(self.kwargs.get('hub'))
+
+
+class DeleteDeviceView(HubUserPassesTestMixin, RedirectView):
+    login_url = '/hub/login/'
+
+    def test_func(self):
+        return self.user['is_staff']
+
+    def get(self, *args, **kwargs):
+        hub = AuthServiceApi.get_hub(self.kwargs.get('hub'))
+        token = self.request.COOKIES.get(
+            'user_token')
+        InternalApi.delete_device(token, hub, self.kwargs.get('pk'))
+        return redirect(self.get_success_url())
 
     def get_success_url(self):
         return '/hub/dashboard/hub/%d/' % int(self.kwargs.get('hub'))
@@ -687,3 +714,20 @@ class ConnectUnitConfirmView(HubUserPassesTestMixin, TemplateView):
 
     def get_success_url(self):
         return '/hub/dashboard/hub/%s/device/%s/units/%s/connected_units/' % (self.kwargs.get('hub'), self.kwargs.get('device'), self.kwargs.get('pk'))
+
+
+class DeleteConnectedUnitView(HubUserPassesTestMixin, RedirectView):
+    login_url = '/hub/login/'
+
+    def test_func(self):
+        return self.user['is_staff']
+
+    def get(self, *args, **kwargs):
+        hub = AuthServiceApi.get_hub(self.kwargs.get('hub'))
+        token = self.request.COOKIES.get(
+            'user_token')
+        InternalApi.delete_connected_unit(token, hub, self.kwargs.get('pk'))
+        return redirect(self.get_success_url())
+
+    def get_success_url(self):
+        return '/hub/dashboard/hub/%s/device/%s/units/%s/connected_units/' % (self.kwargs.get('hub'), self.kwargs.get('device'), self.kwargs.get('unit'))

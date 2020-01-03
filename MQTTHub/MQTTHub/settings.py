@@ -25,7 +25,7 @@ SECRET_KEY = '_f^f^2=439fyzt2-!u=408^s(h+5ne_n8mihrnmtat-9w*q!c1'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -141,3 +141,25 @@ STATICFILES_DIRS = [
 ]
 
 # STATIC_ROOT = os.path.join(BASE_DIR, "staticfolder")
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, "debug.log"),
+        },
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}

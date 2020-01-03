@@ -14,6 +14,8 @@ api_url_patterns = [
         v.HubValidApiKeyView.as_view(), name='api_key_validate'),
     url(r'^api/hubs/register_device/$', v.RegisterDeviceAPIView.as_view(),
         name='api_register_device'),
+    url(r'^api/hubs/unregister_device/$', v.UnregisterDeviceAPIView.as_view(),
+        name='api_unregister_device'),
     url(r'^api/users/$', v.UsersView.as_view(), name='api_users'),
     url(r'^api/users/(?P<pk>\d+)/$', v.UsersView.as_view(),
         name='api_users_detail'),

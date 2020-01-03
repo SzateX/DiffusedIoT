@@ -74,6 +74,22 @@ class RegisterDeviceAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class UnregisterDeviceAPIView(APIView):
+    def delete(self, request, format=None):
+        serializer = RegisterDeviceSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                device = RegisteredDevice.objects.get(
+                    hub=serializer.validated_data['hub'],
+                    device_id=serializer.validated_data['device_id']
+                )
+                device.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            except RegisteredDevice.DoesNotExist:
+                raise Http404
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class UsersView(APIView):
     def get_object(self, pk):
         try:

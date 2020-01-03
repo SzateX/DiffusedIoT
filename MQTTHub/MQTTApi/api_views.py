@@ -63,6 +63,19 @@ class DevicesApiForUserView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def delete(self, request, pk, format=None):
+        me = AuthServiceApi.get_me(self.request.headers.get('Authorization'))
+        if not me['is_staff']:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        try:
+            device = Device.objects.get(pk=pk)
+        except Device.DoesNotExist:
+            raise Http404
+        AuthServiceApi.unregister_device(HUB_ID, device)
+        device.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
     def get_all(self, request, format=None):
         me = AuthServiceApi.get_me(request.headers.get('Authorization'))
         if me['is_staff']:

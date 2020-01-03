@@ -16,6 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+handler500 = 'MQTTApi.views.handler500'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('hub/', include('MQTTApi.urls'))

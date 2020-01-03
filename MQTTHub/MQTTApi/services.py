@@ -1,5 +1,6 @@
 import requests
 from django import forms
+from django.http import Http404
 
 from MQTTHub.settings import AUTH_SERVICE_ADDRESS
 
@@ -44,6 +45,8 @@ class AuthServiceApi(object):
         response = requests.get(
             AUTH_SERVICE_ADDRESS + "/api/hub/%s/" % hub_id,
         )
+        if response.status_code == 404:
+            raise Http404()
         if response.status_code != 200:
             raise Exception("Error in connection with AuthService: "
                             + response.text)
@@ -84,6 +87,8 @@ class AuthServiceApi(object):
     def get_user_permissions(hub_id, user_id):
         response = requests.get(
             AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/user_permissions/for_user/%s/" % (hub_id, user_id))
+        if response.status_code == 404:
+            raise Http404
         if response.status_code != 200:
             raise Exception("Error in connection with AuthService: "
                             + response.text)
@@ -93,6 +98,8 @@ class AuthServiceApi(object):
     def get_group_permissions(hub_id, group_ids):
         response = requests.get(
             AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/group_permissions/for_groups" % hub_id, json=[{"pk": pk} for pk in group_ids])
+        if response.status_code == 404:
+            raise Http404
         if response.status_code != 200:
             raise Exception("Error in connection with AuthService: "
                             + response.text)
@@ -102,6 +109,8 @@ class AuthServiceApi(object):
     def get_device_user_permissions(hub_id, device_id):
         response = requests.get(
             AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/user_permissions/" % (hub_id, device_id))
+        if response.status_code == 404:
+            raise Http404
         if response.status_code != 200:
             raise Exception("Error in connection with AuthService: "
                             + response.text)
@@ -112,6 +121,8 @@ class AuthServiceApi(object):
         response = requests.get(
             AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/group_permissions/" % (
             hub_id, device_id))
+        if response.status_code == 404:
+            raise Http404
         if response.status_code != 200:
             raise Exception("Error in connection with AuthService: "
                             + response.text)
@@ -122,6 +133,8 @@ class AuthServiceApi(object):
         response = requests.get(
             AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/user_permissions/%s" % (
             hub_id, device_id, permission_id))
+        if response.status_code == 404:
+            raise Http404
         if response.status_code != 200:
             raise Exception("Error in connection with AuthService: "
                             + response.text)
@@ -132,6 +145,8 @@ class AuthServiceApi(object):
         response = requests.get(
             AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/group_permissions/%s" % (
                 hub_id, device_id, permission_id))
+        if response.status_code == 404:
+            raise Http404
         if response.status_code != 200:
             raise Exception("Error in connection with AuthService: "
                             + response.text)
@@ -144,7 +159,8 @@ class AuthServiceApi(object):
             hub_id, device_id),
             json=permission_obj
         )
-        print(response.status_code)
+        if response.status_code == 404:
+            raise Http404
         if response.status_code not in [200, 201]:
             raise Exception("Error in connection with AuthService: "
                             + response.text)
@@ -157,6 +173,8 @@ class AuthServiceApi(object):
                 hub_id, device_id),
             json=permission_obj
         )
+        if response.status_code == 404:
+            raise Http404
         if response.status_code not in [200, 201]:
             raise Exception("Error in connection with AuthService: "
                             + response.text)
@@ -169,6 +187,8 @@ class AuthServiceApi(object):
                 hub_id, device_id, permission_id),
             json=permission_obj
         )
+        if response.status_code == 404:
+            raise Http404
         if response.status_code != 200:
             raise Exception("Error in connection with AuthService: "
                             + response.text)
@@ -181,6 +201,8 @@ class AuthServiceApi(object):
                 hub_id, device_id, permission_id),
             json=permission_obj
         )
+        if response.status_code == 404:
+            raise Http404
         if response.status_code != 200:
             raise Exception("Error in connection with AuthService: "
                             + response.text)
@@ -192,6 +214,8 @@ class AuthServiceApi(object):
             AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/user_permissions/%s/" % (
                 hub_id, device_id, permission_id),
         )
+        if response.status_code == 404:
+            raise Http404
         if response.status_code != 204:
             raise Exception("Error in connection with AuthService: "
                             + response.text)
@@ -203,6 +227,8 @@ class AuthServiceApi(object):
             AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/group_permissions/%s/" % (
                 hub_id, device_id, permission_id),
         )
+        if response.status_code == 404:
+            raise Http404
         if response.status_code != 204:
             raise Exception("Error in connection with AuthService: "
                             + response.text)
@@ -217,8 +243,24 @@ class AuthServiceApi(object):
                 'device_id': device.pk
             }
         )
-
+        if response.status_code == 404:
+            raise Http404
         if response.status_code not in [200, 201]:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+
+    @staticmethod
+    def unregister_device(hub_id, device):
+        response = requests.delete(
+            AUTH_SERVICE_ADDRESS + "/api/hubs/unregister_device/",
+            json={
+                'hub': hub_id,
+                'device_id': device.pk
+            }
+        )
+        if response.status_code == 404:
+            raise Http404
+        if response.status_code not in [204]:
             raise Exception("Error in connection with AuthService: "
                             + response.text)
 
@@ -232,6 +274,8 @@ class InternalApi(object):
                 'Authorization': "Bearer " + token
             }
         )
+        if response.status_code == 404:
+            raise Http404
         if response.status_code != 200:
             raise Exception("Error in connection with AuthService: "
                             + response.text)
@@ -249,6 +293,8 @@ class InternalApi(object):
                 'type_of_device':  form.cleaned_data['type_of_device']
             }
         )
+        if response.status_code == 404:
+            raise Http404
         if response.status_code not in [200, 201]:
             raise Exception("Error in connection with InternalApi: "
                             + response.text)
@@ -261,6 +307,8 @@ class InternalApi(object):
                 'Authorization': token
             },
         )
+        if response.status_code == 404:
+            raise Http404
         if response.status_code not in [200]:
             raise Exception("Error in connection with InternalApi: "
                             + response.text)
@@ -278,9 +326,28 @@ class InternalApi(object):
                 'type_of_device': form.cleaned_data['type_of_device']
             }
         )
+        if response.status_code == 404:
+            raise Http404
         if response.status_code not in [200, 201]:
             raise Exception("Error in connection with InternalApi: "
                             + response.text)
+
+
+    @staticmethod
+    def delete_device(token, hub, device_id):
+        response = requests.delete(
+            hub[
+                'private_address'] + "/hub/internal_api/devices_for_user/%s/" % device_id,
+            headers={
+                'Authorization': token
+            },
+        )
+        if response.status_code == 404:
+            raise Http404
+        if response.status_code not in [204]:
+            raise Exception("Error in connection with InternalApi: "
+                            + response.text)
+
 
     @staticmethod
     def get_units(token, hub, device_id):
@@ -290,6 +357,8 @@ class InternalApi(object):
                 'Authorization': token
             },
         )
+        if response.status_code == 404:
+            raise Http404
         if response.status_code not in [200, 201]:
             raise Exception("Error in connection with InternalApi: "
                             + response.text)
@@ -304,6 +373,8 @@ class InternalApi(object):
                 'Authorization': token
             },
         )
+        if response.status_code == 404:
+            raise Http404
         if response.status_code not in [200, 201]:
             raise Exception("Error in connection with InternalApi: "
                             + response.text)
@@ -319,6 +390,8 @@ class InternalApi(object):
             },
             json=cleaned_data
         )
+        if response.status_code == 404:
+            raise Http404
         if response.status_code not in [200, 201]:
             raise Exception("Error in connection with InternalApi: "
                             + response.text)
@@ -334,6 +407,8 @@ class InternalApi(object):
             },
             json=cleaned_data
         )
+        if response.status_code == 404:
+            raise Http404
         if response.status_code not in [200, 201]:
             raise Exception("Error in connection with InternalApi: "
                             + response.text)
@@ -349,6 +424,8 @@ class InternalApi(object):
                 'Authorization': token
             },
         )
+        if response.status_code == 404:
+            raise Http404
         if response.status_code not in [204]:
             raise Exception("Error in connection with InternalApi: "
                             + response.text)
@@ -363,6 +440,8 @@ class InternalApi(object):
                 'Authorization': token
             },
         )
+        if response.status_code == 404:
+            raise Http404
         if response.status_code not in [200, 201]:
             raise Exception("Error in connection with InternalApi: "
                             + response.text)
@@ -377,6 +456,8 @@ class InternalApi(object):
                 'Authorization': token
             },
         )
+        if response.status_code == 404:
+            raise Http404
         if response.status_code not in [200, 201]:
             raise Exception("Error in connection with InternalApi: "
                             + response.text)
@@ -392,6 +473,8 @@ class InternalApi(object):
             },
             json=cleaned_data
         )
+        if response.status_code == 404:
+            raise Http404
         if response.status_code not in [200, 201]:
             raise Exception("Error in connection with InternalApi: "
                             + response.text)
@@ -407,6 +490,8 @@ class InternalApi(object):
                 'Authorization': token
             },
         )
+        if response.status_code == 404:
+            raise Http404
         if response.status_code not in [204]:
             raise Exception("Error in connection with InternalApi: "
                             + response.text)
@@ -418,6 +503,8 @@ class InternalApi(object):
             hub['private_address'] + "/hub/internal_api/connected_units/send_data/",
             json=data
         )
+        if response.status_code == 404:
+            raise Http404
         if response.status_code != 200:
             raise Exception("Error in connection with InternalAPi: " + response.text)
         return response
