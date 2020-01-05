@@ -64,5 +64,9 @@ api_url_patterns = [
     ),
     url(r'api/hubs/(?P<hub>\d+)/registred_devices/(?P<device>\d+)/has_read_perm/(?P<user>\d+)/$',
         v.HasReadPermissionForDevice.as_view(), name="has_read_perm"),
+    url(r'api/hubs/(?P<hub>\d+)/registred_devices/(?P<device>\d+)/has_write_perm/(?P<user>\d+)/$',
+        v.HasWritePermissionForDevice.as_view(), name="has_write_perm"),
+    url(r'api/hubs/(?P<hub>\d+)/registred_devices/devices_with_read_permission/(?P<user>\d+)/$',
+        v.RegistredDevicesWithReadPermission.as_view(), name="devices_with_permission"),
     url(r'api/get_me/$', v.GetMe.as_view(), name="api_get_me")
 ]

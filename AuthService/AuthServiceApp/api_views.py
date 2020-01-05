@@ -285,6 +285,8 @@ class HasReadPermissionForDevice(APIView):
     def get(self, request, hub, device, user, format=None):
         hub_obj = self.get_object(Hub, pk=hub)
         user = self.get_object(User, pk=user)
+        if user.is_staff:
+            return Response({'has_read_perm': True}, status=status.HTTP_200_OK)
         devices = RegisteredDevice.objects.filter(
             Q(device_user_perms__user=user, device_user_perms__read_permission=True) | Q(device_group_perms__group__in=user.groups.all(), device_group_perms__read_permission=True),
                                                   hub=hub_obj, device_id=device)
@@ -303,12 +305,38 @@ class HasWritePermissionForDevice(APIView):
     def get(self, request, hub, device, user, format=None):
         hub_obj = self.get_object(Hub, pk=hub)
         user = self.get_object(User, pk=user)
+        if user.is_staff:
+            return Response({'has_write_perm': True}, status=status.HTTP_200_OK)
         devices = RegisteredDevice.objects.filter(
             Q(device_user_perms__user=user, device_user_perms__write_permission=True) | Q(device_group_perms__group__in=user.groups.all(), device_group_perms__write_permission=True),
                                                   hub=hub_obj, device_id=device)
         if devices:
             return Response({'has_write_perm': True}, status=status.HTTP_200_OK)
         return Response({'has_write_perm': False}, status=status.HTTP_200_OK)
+
+
+class RegistredDevicesWithReadPermission(APIView):
+    def get_object(self, model, **kwargs):
+        try:
+            return model.objects.get(**kwargs)
+        except model.DoesNotExist:
+            raise Http404
+
+    def get(self, request, hub, user, format=None):
+        hub_obj = self.get_object(Hub, pk=Hub)
+        user = self.get_object(User, pk=user)
+        if user.is_staff:
+            devices = RegisteredDevice.objects.all()
+        else:
+            devices = RegisteredDevice.objects.filter(
+                Q(device_user_perms__user=user,
+                    device_user_perms__read_permission=True) | Q(
+                    device_group_perms__group__in=user.groups.all(),
+                    device_group_perms__read_permission=True),
+                hub=hub_obj)
+
+        device_ids = list(map(lambda x: x['device_id'], devices))
+        return Response({'read_permission_devices': device_ids}, status=status.HTTP_200_OK)
 
 
 class GetMe(APIView):

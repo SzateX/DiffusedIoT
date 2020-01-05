@@ -264,6 +264,44 @@ class AuthServiceApi(object):
             raise Exception("Error in connection with AuthService: "
                             + response.text)
 
+    @staticmethod
+    def has_read_permission(hub_id, device, user):
+        response = requests.get(
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%d/registred_devices/%d/has_read_perm/%d/" % (hub_id, device.pk, user.pk)
+        )
+        if response.status_code == 404:
+            raise Http404
+        if response.status_code != 200:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+        return response.json()
+
+    @staticmethod
+    def has_write_permission(hub_id, device, user):
+        response = requests.get(
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%d/registred_devices/%d/has_write_perm/%d/" % (
+            hub_id, device.pk, user.pk)
+        )
+        if response.status_code == 404:
+            raise Http404
+        if response.status_code != 200:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+        return response.json()
+
+    @staticmethod
+    def get_registred_devices_with_read_perm(hub_id, user):
+        response = requests.get(
+            AUTH_SERVICE_ADDRESS + "api/hubs/%d/registred_devices/devices_with_read_permission/%d/" % (
+            hub_id, user.pk)
+        )
+        if response.status_code == 404:
+            raise Http404
+        if response.status_code != 200:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+        return response.json()
+
 
 class InternalApi(object):
     @staticmethod
@@ -332,7 +370,6 @@ class InternalApi(object):
             raise Exception("Error in connection with InternalApi: "
                             + response.text)
 
-
     @staticmethod
     def delete_device(token, hub, device_id):
         response = requests.delete(
@@ -347,7 +384,6 @@ class InternalApi(object):
         if response.status_code not in [204]:
             raise Exception("Error in connection with InternalApi: "
                             + response.text)
-
 
     @staticmethod
     def get_units(token, hub, device_id):
