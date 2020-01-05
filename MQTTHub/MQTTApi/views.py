@@ -1,16 +1,24 @@
+import json
+
 import requests
 from django.contrib.auth.mixins import AccessMixin
 from django.contrib.auth.views import redirect_to_login
 from django.http import HttpResponseRedirect
 from django.shortcuts import resolve_url, redirect, render
+from django.utils import timezone
 from django.utils.http import is_safe_url
 from django.views.generic import FormView, TemplateView, RedirectView
 
+from MQTTApi import serializers
+from MQTTApi.enums import UnitType
+from MQTTApi.models import TemperatureUnitValue, SwitchUnitValue, \
+    HumidityUnitValue
 from MQTTApi.services import AuthServiceApi, InternalApi
 from MQTTHub import settings
 from MQTTHub.settings import AUTH_SERVICE_ADDRESS
 from MQTTApi.forms import HubAuthorizationForm, HubDeviceForm, \
-    UserPermissionForm, GroupPermissionForm, UnitForm
+    UserPermissionForm, GroupPermissionForm, UnitForm, \
+    TemperatureUnitValueForm, HumidityUnitValueForm, SwitchUnitValueForm
 
 
 def handler500(request):
@@ -731,3 +739,103 @@ class DeleteConnectedUnitView(HubUserPassesTestMixin, RedirectView):
 
     def get_success_url(self):
         return '/hub/dashboard/hub/%s/device/%s/units/%s/connected_units/' % (self.kwargs.get('hub'), self.kwargs.get('device'), self.kwargs.get('unit'))
+
+
+class UnitDataView(HubLoginRequiredMixin, FormView):
+    login_url = '/hub/login/'
+    template_name = 'MQTTApi/units/data.html'
+
+    def get(self, request, *args, **kwargs):
+        hub = AuthServiceApi.get_hub(self.kwargs.get('hub'))
+        self.hub = hub
+        token = self.request.COOKIES.get('user_token')
+        self.device = InternalApi.get_device(token, self.hub,
+                                             self.kwargs.get('device'))
+        self.unit = InternalApi.get_unit(token, hub, self.kwargs.get('device'), self.kwargs.get('pk'))
+        self.data = InternalApi.get_data_from_unit(token, hub, self.kwargs.get('device'), self.kwargs.get('pk'))
+        self.has_write_perms = AuthServiceApi.has_write_permission(hub['pk'], self.kwargs.get('device'), self.user['pk'])
+        return super(UnitDataView, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.hub = AuthServiceApi.get_hub(self.kwargs.get('hub'))
+        self.token = self.request.COOKIES.get('user_token')
+        self.device = InternalApi.get_device(self.token, self.hub, self.kwargs.get('device'))
+        self.unit = InternalApi.get_unit(self.token, self.hub, self.kwargs.get('device'),
+                                         self.kwargs.get('pk'))
+        self.data = InternalApi.get_data_from_unit(self.token, self.hub,
+                                                   self.kwargs.get('device'),
+                                                   self.kwargs.get('pk'))
+        self.has_write_perms = AuthServiceApi.has_write_permission(self.hub['pk'],
+                                                                   self.kwargs.get(
+                                                                       'device'),
+                                                                   self.user[
+                                                                       'pk'])
+        if not self.has_write_perms['has_write_perm']:
+            return HttpResponseRedirect(self.get_success_url())
+        return super(UnitDataView, self).post(request, *args, **kwargs)
+
+    def get_form_class(self):
+        if self.unit['type_of_unit'] == UnitType.TEMPERATURE_UNIT:
+            return TemperatureUnitValueForm
+        elif self.unit['type_of_unit'] == UnitType.SWITCH_UNIT:
+            return SwitchUnitValueForm
+        elif self.unit['type_of_unit'] == UnitType.HUMIDITY_UNIT:
+            return HumidityUnitValueForm
+        return None
+
+    def get_context_data(self, **kwargs):
+        context = super(UnitDataView, self).get_context_data(**kwargs)
+        context['data'] = self.data
+        context['hub'] = self.hub
+        context['device'] = self.device
+        context['unit'] = self.unit
+        context['has_write_perms'] = self.has_write_perms['has_write_perm']
+        context['has_unit'] = self.unit['type_of_unit'] in [UnitType.HUMIDITY_UNIT, UnitType.TEMPERATURE_UNIT]
+        return context
+
+    def form_valid(self, form):
+        if self.unit['type_of_unit'] == UnitType.TEMPERATURE_UNIT:
+            obj = TemperatureUnitValue(timestamp=timezone.now(), incoming=True, **form.cleaned_data)
+            serializer_obj = json.dumps(
+                serializers.TemperatureUnitValueSerializer(obj).data)
+            prepared_objs = [json.dumps({'data': serializer_obj,
+                              'type': 'TemperatureUnitValue'})]
+        elif self.unit['type_of_unit'] == UnitType.SWITCH_UNIT:
+            obj = SwitchUnitValue(timestamp=timezone.now(), incoming=True,
+                                       **form.cleaned_data)
+            serializer_obj = json.dumps(
+                serializers.SwitchUnitValueSerializer(obj).data)
+            prepared_objs = [{'data': serializer_obj,
+                              'type': 'SwitchUnitValue'}]
+        elif self.unit['type_of_unit'] == UnitType.HUMIDITY_UNIT:
+            obj = HumidityUnitValue(timestamp=timezone.now(), incoming=True,
+                                       **form.cleaned_data)
+            serializer_obj = json.dumps(
+                serializers.HumidityUnitValueSerializer(obj).data)
+            prepared_objs = [{'data': serializer_obj,
+                              'type': 'HumidityUnitValue'}]
+        else:
+            raise Exception("Invalid Type Of Device")
+        payload = {
+            'device': int(self.kwargs.get('device')),
+            'unit': self.unit['pk'],
+            'data': prepared_objs
+        }
+        InternalApi.send_data_to_unit(self.hub, payload)
+
+        connected_units = InternalApi.get_connected_units_with_unit(self.token, self.hub, self.unit['pk'])
+        for connected_unit in connected_units:
+            payload = {
+                'device': connected_unit['dest_device'],
+                'unit': connected_unit['dest_unit'],
+                'data': prepared_objs
+            }
+            hub = AuthServiceApi.get_hub(connected_unit['dest_hub'])
+            InternalApi.send_data_to_unit(hub, payload)
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return '/hub/dashboard/hub/%s/device/%s/units/%s/data/' % (
+        self.kwargs.get('hub'), self.kwargs.get('device'),
+        self.kwargs.get('pk'))

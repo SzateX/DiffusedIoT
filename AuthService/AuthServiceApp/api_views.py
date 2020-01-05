@@ -323,7 +323,7 @@ class RegistredDevicesWithReadPermission(APIView):
             raise Http404
 
     def get(self, request, hub, user, format=None):
-        hub_obj = self.get_object(Hub, pk=Hub)
+        hub_obj = self.get_object(Hub, pk=hub)
         user = self.get_object(User, pk=user)
         if user.is_staff:
             devices = RegisteredDevice.objects.all()
@@ -335,7 +335,7 @@ class RegistredDevicesWithReadPermission(APIView):
                     device_group_perms__read_permission=True),
                 hub=hub_obj)
 
-        device_ids = list(map(lambda x: x['device_id'], devices))
+        device_ids = list(map(lambda x: x.device_id, devices))
         return Response({'read_permission_devices': device_ids}, status=status.HTTP_200_OK)
 
 

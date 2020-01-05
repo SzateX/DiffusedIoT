@@ -1,0 +1,58 @@
+{% extends 'MQTTApi/base.html' %}
+{% block content %}
+    <h3>Connected units for:</h3>
+    <div class="row">
+        <h5>Hub:</h5>
+        Id: {{ hub.pk }}<br>
+        Name: {{ hub.name }}<br>
+        Private Address: {{ hub.private_address }}<br>
+        Public Address: {{ hub.public_address }}
+    </div>
+    <div class="row">
+        <h5>Device:</h5>
+        Id: {{ device.pk }}<br>
+        Name: {{ device.name }}<br>
+        Type Of Device: {{ device.type_of_device }}
+    </div>
+        <div class="row">
+        <h5>Unit:</h5>
+        Id: {{ unit.pk }}<br>
+        Name: {{ unit.name }}<br>
+        Direction: {{ unit.direction }}<br>
+        Type Of Unit: {{ unit.type_of_unit }}
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Timestamp</th>
+            <th>Incoming</th>
+            <th>Value</th>
+            {% if has_unit %}
+                <th>Unit</th>
+            {% endif %}
+        </tr>
+        </thead>
+        <tbody>
+            {% for value in data %}
+                <tr>
+                    <td>{{ value.timestamp }}</td>
+                    <td>{{ value.incoming }}</td>
+                    <td>{{ value.value }}</td>
+                    {% if has_unit %}
+                        <td>{{value.unit}}</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if has_write_perms %}
+        <h5>Send data to unit, and connected units:</h5>
+        <form method="post">{% csrf_token %}
+                {{ form.as_p }}
+                <button class="btn waves-effect waves-light" type="submit" name="action">Submit
+                    <i class="material-icons right">send</i>
+                </button>
+            </form>
+    {% endif %}
+{% endblock %}

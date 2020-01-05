@@ -20,21 +20,6 @@ from .serializers import DeviceSerializer, DeviceUnitSerializer, \
     SwitchUnitValueSerializer
 
 
-def get_devices_pks(me, user_permissions, group_permissions):
-    groups_pk = map(lambda group: group['pk'], me['groups'])
-    filtered_group_permissions = filter(
-        lambda x: x['pk'] in groups_pk and x[
-            'read_permission'] is True,
-        group_permissions)
-    filtered_user_permissions = filter(
-        lambda x: x['pk'] == me['pk'] and x['read_permission'] is True,
-        user_permissions)
-    devices_pk = set(
-        map(lambda x: x['device'], filtered_group_permissions)).union(
-        set(map(lambda x: x['device'], filtered_user_permissions)))
-    return devices_pk
-
-
 class DevicesApiForUserView(APIView):
     def get(self, request, pk=None, format=None):
         if pk is None:
@@ -83,33 +68,16 @@ class DevicesApiForUserView(APIView):
         if me['is_staff']:
             devices = Device.objects.all()
         else:
-            user_permissions = AuthServiceApi.get_user_permissions(HUB_ID,
-                                                                   me['pk'])
-            group_permissions = AuthServiceApi.get_group_permissions(HUB_ID,
-                                                                     list(map(
-                                                                         lambda
-                                                                             group:
-                                                                         group[
-                                                                             'pk'],
-                                                                         me[
-                                                                             'groups'])))
-            devices_pk = set(
-                map(lambda x: x['device'], group_permissions)).union(
-                set(map(lambda x: x['device'], user_permissions)))
-            devices = Device.objects.filter(pk__in=devices_pk)
+            devices_pks = AuthServiceApi.get_registered_devices_with_read_perm(HUB_ID, me['pk'])['read_permission_devices']
+            devices = Device.objects.filter(pk__in=devices_pks)
         serializer = DeviceSerializer(devices, many=True)
         return Response(serializer.data)
 
     def get_one(self, request, pk, format=None):
         me = AuthServiceApi.get_me(self.request.headers.get('Authorization'))
         if not me['is_staff']:
-            user_permissions = AuthServiceApi.get_device_user_permissions(
-                HUB_ID, pk)
-            group_permissions = AuthServiceApi.get_device_group_permissions(
-                HUB_ID, pk)
-            devices_pk = get_devices_pks(me, user_permissions,
-                                         group_permissions)
-            if pk not in devices_pk:
+            read_permission = AuthServiceApi.has_read_permission(HUB_ID, pk, me['pk'])
+            if not read_permission['has_read_perm']:
                 raise Http404
         try:
             devices = Device.objects.get(pk=pk)
@@ -122,25 +90,27 @@ class DevicesApiForUserView(APIView):
 class DeviceUnitsApiView(APIView):
     def get(self, request, device, pk=None, format=None):
         me = AuthServiceApi.get_me(self.request.headers.get('Authorization'))
-        user_permissions = AuthServiceApi.get_device_user_permissions(HUB_ID,
-                                                                      device)
-        group_permissions = AuthServiceApi.get_device_group_permissions(HUB_ID,
-                                                                        device)
         device_obj = Device.objects.get(pk=device)
         if pk is None:
             if me['is_staff']:
                 objects = DeviceUnit.objects.filter(device=device_obj)
             else:
-                devices_pk = get_devices_pks(me, user_permissions,
-                                             group_permissions)
-                if device not in devices_pk:
+                read_permission = AuthServiceApi.has_read_permission(HUB_ID,
+                                                                     device,
+                                                                     me['pk'])
+                if not read_permission['has_read_perm']:
                     return Response(status=status.HTTP_403_FORBIDDEN)
                 objects = DeviceUnit.objects.filter(device=device_obj)
         else:
+            read_permission = AuthServiceApi.has_read_permission(HUB_ID,
+                                                                 device,
+                                                                 me['pk'])
             if me['is_staff']:
                 objects = DeviceUnit.objects.get(device=device_obj, pk=pk)
             else:
-                return Response(status=status.HTTP_403_FORBIDDEN)
+                if not read_permission['has_read_perm']:
+                    return Response(status=status.HTTP_403_FORBIDDEN)
+                objects = DeviceUnit.objects.get(device=device_obj, pk=pk)
 
         serializer = DeviceUnitSerializer(objects, many=pk is None)
         return Response(serializer.data)
@@ -210,8 +180,7 @@ class ConnectedUnitApiView(APIView):
         serializer = ConnectedUnitSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            # device_unit = DeviceUnit.objects.get(pk=serializer.validated_data['from_unit'])
-            # ConnectedUnit.objects.create(from_unit=device_unit, dest_hub=serializer.validated_data['dest_hub'], dest_device=serializer.validated_data['dest_device'], dest_unit=serializer.validated_data['dest_unit'])
+
             return Response(request.data,
                             status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -228,48 +197,48 @@ class ConnectedUnitApiView(APIView):
 class IncomingDataToUnitApiView(APIView):
     def post(self, request, format=None):
         serializer = DataSerializer(data=request.data)
-        if serializer.is_valid():
-            device = serializer.validated_data['device']
-            unit = serializer.validated_data['unit']
-            data = serializer.validated_data['data']
-            objs = []
-            for data_obj in data:
-                try:
-                    d = json.loads(data_obj)
-                except Exception as e:
-                    pass
-                if 'data' not in d or 'type' not in d:
-                    return Response({'error': 'Invalid data'}, status=status.HTTP_400_BAD_REQUEST)
-                t = d['type']
-                d = json.loads(d['data'])
-                if t == 'TemperatureUnitValue':
-                    serializer = TemperatureUnitValueSerializer(data=d)
-                    if serializer.is_valid():
-                        obj = TemperatureUnitValue(device_unit=unit, incoming=True, **serializer.validated_data)
-                        objs.append(obj)
+        try:
+            if serializer.is_valid():
+                device = serializer.validated_data['device']
+                unit = serializer.validated_data['unit']
+                data = serializer.validated_data['data']
+                objs = []
+                for data_obj in data:
+                    try:
+                        d = json.loads(data_obj)
+                    except Exception as e:
+                        pass
+                    if 'data' not in d or 'type' not in d:
+                        return Response({'error': 'Invalid data'}, status=status.HTTP_400_BAD_REQUEST)
+                    t = d['type']
+                    d = json.loads(d['data'])
+                    if t == 'TemperatureUnitValue':
+                        serializer = TemperatureUnitValueSerializer(data=d)
+                        if serializer.is_valid():
+                            obj = TemperatureUnitValue(device_unit=unit, incoming=True, **serializer.validated_data)
+                            objs.append(obj)
+                        else:
+                            return Response(serializer.errors,
+                                            status=status.HTTP_400_BAD_REQUEST)
                     else:
-                        return Response(serializer.errors,
+                        return Response({'error': 'Invalid type'},
                                         status=status.HTTP_400_BAD_REQUEST)
-                else:
-                    return Response({'error': 'Invalid type'},
-                                    status=status.HTTP_400_BAD_REQUEST)
-            mqtt_incoming(device, unit, objs)
-            return Response(request.data,
-                            status=status.HTTP_200_OK)
+                mqtt_incoming(device, unit, objs)
+                return Response(request.data,
+                                status=status.HTTP_200_OK)
+        except Exception as e:
+            pass
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GetDataFromUnitView(APIView):
     def get(self, request, device, pk, format=None):
         me = AuthServiceApi.get_me(self.request.headers.get('Authorization'))
-        user_permissions = AuthServiceApi.get_device_user_permissions(HUB_ID,
-                                                                      device)
-        group_permissions = AuthServiceApi.get_device_group_permissions(HUB_ID,
-                                                                        device)
         if not me['is_staff']:
-            devices_pk = get_devices_pks(me, user_permissions,
-                                         group_permissions)
-            if device not in devices_pk:
+            read_permission = AuthServiceApi.has_read_permission(HUB_ID,
+                                                                 device,
+                                                                 me['pk'])
+            if not read_permission['has_read_perm']:
                 return Response(status=status.HTTP_403_FORBIDDEN)
 
         try:

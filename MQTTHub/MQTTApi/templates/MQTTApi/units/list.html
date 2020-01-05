@@ -22,8 +22,8 @@
         <tbody>
         {% for unit in units %}
             <tr>
-                <td>{{ unit.pk }}</td>
-                <td>{{ unit.name }}</td>
+                <td><a href="{% url 'unit_data' hub device.pk unit.pk %}">{{ unit.pk }}</a></td>
+                <td><a href="{% url 'unit_data' hub device.pk unit.pk %}">{{ unit.name }}</a></td>
                 <td>{{ unit.direction }}</td>
                 <td>{{ unit.type_of_unit }}</td>
                 <td>

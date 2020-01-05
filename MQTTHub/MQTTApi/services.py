@@ -265,9 +265,9 @@ class AuthServiceApi(object):
                             + response.text)
 
     @staticmethod
-    def has_read_permission(hub_id, device, user):
+    def has_read_permission(hub_id, device_id, user_id):
         response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/hubs/%d/registred_devices/%d/has_read_perm/%d/" % (hub_id, device.pk, user.pk)
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/has_read_perm/%s/" % (hub_id, device_id, user_id)
         )
         if response.status_code == 404:
             raise Http404
@@ -277,10 +277,10 @@ class AuthServiceApi(object):
         return response.json()
 
     @staticmethod
-    def has_write_permission(hub_id, device, user):
+    def has_write_permission(hub_id, device_id, user_id):
         response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/hubs/%d/registred_devices/%d/has_write_perm/%d/" % (
-            hub_id, device.pk, user.pk)
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/has_write_perm/%s/" % (
+            hub_id, device_id, user_id)
         )
         if response.status_code == 404:
             raise Http404
@@ -290,10 +290,10 @@ class AuthServiceApi(object):
         return response.json()
 
     @staticmethod
-    def get_registred_devices_with_read_perm(hub_id, user):
+    def get_registered_devices_with_read_perm(hub_id, user_id):
         response = requests.get(
-            AUTH_SERVICE_ADDRESS + "api/hubs/%d/registred_devices/devices_with_read_permission/%d/" % (
-            hub_id, user.pk)
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/devices_with_read_permission/%s/" % (
+            hub_id, user_id)
         )
         if response.status_code == 404:
             raise Http404
@@ -542,5 +542,20 @@ class InternalApi(object):
         if response.status_code == 404:
             raise Http404
         if response.status_code != 200:
-            raise Exception("Error in connection with InternalAPi: " + response.text)
+            raise Exception("Error in connection with InternalApi: " + response.text)
         return response
+
+    @staticmethod
+    def get_data_from_unit(token, hub, device_id, unit_id):
+        response = requests.get(
+            hub['private_address'] + "/hub/internal_api/devices_for_user/%s/units/%s/data/" % (device_id, unit_id),
+            headers={
+                'Authorization': token
+            }
+        )
+
+        if response.status_code == 404:
+            raise Http404
+        if response.status_code != 200:
+            raise Exception("Error in connection with InternalApi: " + response.text)
+        return response.json()

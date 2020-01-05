@@ -3,7 +3,8 @@ from django import forms
 import requests
 from django.urls import resolve, reverse
 
-from MQTTApi.models import Device, DeviceUnit
+from MQTTApi.models import Device, DeviceUnit, TemperatureUnitValue, \
+    HumidityUnitValue, SwitchUnitValue
 from MQTTApi.services import AuthServiceApi
 from MQTTHub.settings import AUTH_SERVICE_ADDRESS
 
@@ -59,3 +60,21 @@ class UnitForm(forms.Form):
     name = forms.CharField(max_length=200)
     direction = forms.ChoiceField(choices=DeviceUnit.DIRECTION_CHOICES)
     type_of_unit = forms.ChoiceField(choices=DeviceUnit.TYPE_CHOICES)
+
+
+class TemperatureUnitValueForm(forms.ModelForm):
+    class Meta:
+        model = TemperatureUnitValue
+        fields = ('value', 'unit')
+
+
+class HumidityUnitValueForm(forms.ModelForm):
+    class Meta:
+        model = HumidityUnitValue
+        fields = ('value', 'unit')
+
+
+class SwitchUnitValueForm(forms.ModelForm):
+    class Meta:
+        model = SwitchUnitValue
+        fields = ('value', )
