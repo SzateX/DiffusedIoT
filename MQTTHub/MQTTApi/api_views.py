@@ -7,17 +7,20 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from MQTTApi.enums import UnitType
 from MQTTApi.mqtt_parser import mqtt_incoming
 from MQTTApi.services import AuthServiceApi
 from MQTTHub.settings import AUTH_SERVICE_ADDRESS, HUB_ID
 from drivers.GTS.driver import incoming_function
-from .models import Device, DeviceUnit, ConnectedUnit, TemperatureUnitValue
+from .models import Device, DeviceUnit, ConnectedUnit, TemperatureUnitValue, \
+    HumidityUnitValue, SwitchUnitValue
 from .serializers import DeviceSerializer, DeviceUnitSerializer, \
     ConnectedUnitSerializer, ConnectedUnitSaveSerializer, DataSerializer, \
-    TemperatureUnitValueSerializer
+    TemperatureUnitValueSerializer, HumidityUnitValueSerializer, \
+    SwitchUnitValueSerializer
 
 
-def get_devices_pks(self, me, user_permissions, group_permissions):
+def get_devices_pks(me, user_permissions, group_permissions):
     groups_pk = map(lambda group: group['pk'], me['groups'])
     filtered_group_permissions = filter(
         lambda x: x['pk'] in groups_pk and x[
@@ -74,7 +77,6 @@ class DevicesApiForUserView(APIView):
         AuthServiceApi.unregister_device(HUB_ID, device)
         device.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
 
     def get_all(self, request, format=None):
         me = AuthServiceApi.get_me(request.headers.get('Authorization'))
@@ -255,3 +257,39 @@ class IncomingDataToUnitApiView(APIView):
             return Response(request.data,
                             status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GetDataFromUnitView(APIView):
+    def get(self, request, device, pk, format=None):
+        me = AuthServiceApi.get_me(self.request.headers.get('Authorization'))
+        user_permissions = AuthServiceApi.get_device_user_permissions(HUB_ID,
+                                                                      device)
+        group_permissions = AuthServiceApi.get_device_group_permissions(HUB_ID,
+                                                                        device)
+        if not me['is_staff']:
+            devices_pk = get_devices_pks(me, user_permissions,
+                                         group_permissions)
+            if device not in devices_pk:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            device_obj = Device.objects.get(pk=device)
+            unit = DeviceUnit.objects.get(device=device_obj, pk=pk)
+        except Device.DoesNotExist:
+            raise Http404
+        except DeviceUnit.DoesNotExist:
+            raise Http404
+
+        if unit.type_of_unit == UnitType.HUMIDITY_UNIT:
+            objs = HumidityUnitValue.objects.order_by('-timestamp')[:50]
+            serializer = HumidityUnitValueSerializer(objs, many=True)
+        elif unit.type_of_unit == UnitType.TEMPERATURE_UNIT:
+            objs = TemperatureUnitValue.objects.order_by('-timestamp')[:50]
+            serializer = TemperatureUnitValueSerializer(objs, many=True)
+        elif unit.type_of_unit == UnitType.SWITCH_UNIT:
+            objs = SwitchUnitValue.objects.order_by('-timestamp')[:50]
+            serializer = SwitchUnitValueSerializer(objs, many=True)
+        else:
+            raise Exception("Bad Unit Type")
+
+        return Response(serializer.data, status=status.HTTP_200_OK)

@@ -10,6 +10,8 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView, \
     TokenRefreshView, TokenVerifyView
 
+from django.db.models import Q
+
 
 class APIUserLoginView(TokenObtainPairView):
     pass
@@ -271,6 +273,42 @@ class DeviceGroupPermissionListView(APIView):
         serializer = GroupDevicePermissionSerializer(group_permission,
                                                      many=True)
         return Response(serializer.data)
+
+
+class HasReadPermissionForDevice(APIView):
+    def get_object(self, model, **kwargs):
+        try:
+            return model.objects.get(**kwargs)
+        except model.DoesNotExist:
+            raise Http404
+
+    def get(self, request, hub, device, user, format=None):
+        hub_obj = self.get_object(Hub, pk=hub)
+        user = self.get_object(User, pk=user)
+        devices = RegisteredDevice.objects.filter(
+            Q(device_user_perms__user=user, device_user_perms__read_permission=True) | Q(device_group_perms__group__in=user.groups.all(), device_group_perms__read_permission=True),
+                                                  hub=hub_obj, device_id=device)
+        if devices:
+            return Response({'has_read_perm': True}, status=status.HTTP_200_OK)
+        return Response({'has_read_perm': False}, status=status.HTTP_200_OK)
+
+
+class HasWritePermissionForDevice(APIView):
+    def get_object(self, model, **kwargs):
+        try:
+            return model.objects.get(**kwargs)
+        except model.DoesNotExist:
+            raise Http404
+
+    def get(self, request, hub, device, user, format=None):
+        hub_obj = self.get_object(Hub, pk=hub)
+        user = self.get_object(User, pk=user)
+        devices = RegisteredDevice.objects.filter(
+            Q(device_user_perms__user=user, device_user_perms__write_permission=True) | Q(device_group_perms__group__in=user.groups.all(), device_group_perms__write_permission=True),
+                                                  hub=hub_obj, device_id=device)
+        if devices:
+            return Response({'has_write_perm': True}, status=status.HTTP_200_OK)
+        return Response({'has_write_perm': False}, status=status.HTTP_200_OK)
 
 
 class GetMe(APIView):

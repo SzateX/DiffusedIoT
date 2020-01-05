@@ -62,5 +62,7 @@ api_url_patterns = [
         v.DeviceGroupPermissionListView.as_view(),
         name="api_device_group_list_permission_for_groups"
     ),
+    url(r'api/hubs/(?P<hub>\d+)/registred_devices/(?P<device>\d+)/has_read_perm/(?P<user>\d+)/$',
+        v.HasReadPermissionForDevice.as_view(), name="has_read_perm"),
     url(r'api/get_me/$', v.GetMe.as_view(), name="api_get_me")
 ]

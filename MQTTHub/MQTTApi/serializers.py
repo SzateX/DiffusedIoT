@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from MQTTApi.models import Device, DeviceUnit, ConnectedUnit, \
-    TemperatureUnitValue
+    TemperatureUnitValue, HumidityUnitValue, SwitchUnitValue
 
 
 class DeviceSerializer(serializers.ModelSerializer):
@@ -38,6 +38,24 @@ class DataSerializer(serializers.Serializer):
 
 
 class TemperatureUnitValueSerializer(serializers.ModelSerializer):
+    incoming = serializers.BooleanField(required=False, read_only=True)
+
     class Meta:
         model = TemperatureUnitValue
-        fields = ('value', 'unit', 'timestamp')
+        fields = ('value', 'unit', 'timestamp', 'incoming')
+
+
+class HumidityUnitValueSerializer(serializers.ModelSerializer):
+    incoming = serializers.BooleanField(required=False, read_only=True)
+
+    class Meta:
+        model = HumidityUnitValue
+        fields = ('value', 'unit', 'timestamp', 'incoming')
+
+
+class SwitchUnitValueSerializer(serializers.ModelSerializer):
+    incoming = serializers.BooleanField(required=False, read_only=True)
+
+    class Meta:
+        model = SwitchUnitValue
+        fields = ('value', 'timestamp', 'incoming')
