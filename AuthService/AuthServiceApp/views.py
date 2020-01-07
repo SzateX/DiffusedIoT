@@ -195,7 +195,7 @@ class HubCreateView(UserPassesTestMixin, CreateView):
 
     def form_valid(self, form):
         self.object = form.save()
-        api_key, key = HubAPIKey.objects.create_key(name=self.object.name, organization=self.object)
+        api_key, key = HubAPIKey.objects.create_key(name=self.object.name, hub=self.object)
         return HttpResponseRedirect(self.get_success_url() + "?key=" + key + "&c=True")
 
 
@@ -234,11 +234,11 @@ class HubResetApiKey(UserPassesTestMixin, RedirectView):
         kwargs.pop('hub', None)
         url = super(HubResetApiKey, self).get_redirect_url(*args, **kwargs)
         hub = get_object_or_404(Hub, pk=self.kwargs['hub'])
-        keys = HubAPIKey.objects.filter(organization=hub, revoked=False)
+        keys = HubAPIKey.objects.filter(hub=hub, revoked=False)
         for key in keys:
             key.revoked = True
             key.save()
-        api_key, key = HubAPIKey.objects.create_key(name=hub.name, organization=hub)
+        api_key, key = HubAPIKey.objects.create_key(name=hub.name, hub=hub)
         return url + "?key=" + key + "&c=False"
     
 

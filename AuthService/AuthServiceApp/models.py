@@ -10,7 +10,7 @@ class Hub(models.Model):
 
 
 class HubAPIKey(AbstractAPIKey):
-    organization = models.ForeignKey(
+    hub = models.ForeignKey(
         Hub,
         on_delete=models.CASCADE,
         related_name="api_keys",

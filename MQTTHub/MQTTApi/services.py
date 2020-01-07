@@ -1,8 +1,9 @@
 import requests
 from django import forms
 from django.http import Http404
+from requests.auth import AuthBase
 
-from MQTTHub.settings import AUTH_SERVICE_ADDRESS
+from MQTTHub.settings import AUTH_SERVICE_ADDRESS, API_KEY, HUB_ID
 
 
 class AuthServiceApi(object):
@@ -12,8 +13,12 @@ class AuthServiceApi(object):
             AUTH_SERVICE_ADDRESS + "/api/user_auth/verify_token/",
             json={
                 "token": request.COOKIES.get('user_token'),
-
-            })
+            },
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
+        )
         return response.status_code == 200
 
     @staticmethod
@@ -23,7 +28,9 @@ class AuthServiceApi(object):
         response = requests.get(
             AUTH_SERVICE_ADDRESS + "/api/get_me/",
             headers={
-                'Authorization': token
+                'Authorization': token,
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
             }
         )
         if response.status_code != 200:
@@ -34,7 +41,12 @@ class AuthServiceApi(object):
     @staticmethod
     def get_hubs():
         response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/hubs/")
+            AUTH_SERVICE_ADDRESS + "/api/hubs/",
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
+        )
         if response.status_code != 200:
             raise Exception("Error in connection with AuthService: "
                             + response.content)
@@ -44,6 +56,10 @@ class AuthServiceApi(object):
     def get_hub(hub_id):
         response = requests.get(
             AUTH_SERVICE_ADDRESS + "/api/hub/%s/" % hub_id,
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
         )
         if response.status_code == 404:
             raise Http404()
@@ -58,7 +74,12 @@ class AuthServiceApi(object):
             AUTH_SERVICE_ADDRESS + "/api/user_auth/sign_in/", json={
                 "username": username,
                 "password": password
-            })
+            },
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
+        )
         if response.status_code != 200:
             raise forms.ValidationError(response.json().get('detail'))
         return response
@@ -66,7 +87,11 @@ class AuthServiceApi(object):
     @staticmethod
     def get_users():
         response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/users/"
+            AUTH_SERVICE_ADDRESS + "/api/users/",
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
         )
         if response.status_code != 200:
             raise Exception("Error in connection with AuthService: "
@@ -76,7 +101,11 @@ class AuthServiceApi(object):
     @staticmethod
     def get_groups():
         response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/groups/"
+            AUTH_SERVICE_ADDRESS + "/api/groups/",
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
         )
         if response.status_code != 200:
             raise Exception("Error in connection with AuthService: "
@@ -86,7 +115,12 @@ class AuthServiceApi(object):
     @staticmethod
     def get_user_permissions(hub_id, user_id):
         response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/user_permissions/for_user/%s/" % (hub_id, user_id))
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/user_permissions/for_user/%s/" % (hub_id, user_id),
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
+        )
         if response.status_code == 404:
             raise Http404
         if response.status_code != 200:
@@ -97,7 +131,12 @@ class AuthServiceApi(object):
     @staticmethod
     def get_group_permissions(hub_id, group_ids):
         response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/group_permissions/for_groups" % hub_id, json=[{"pk": pk} for pk in group_ids])
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/group_permissions/for_groups" % hub_id, json=[{"pk": pk} for pk in group_ids],
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
+        )
         if response.status_code == 404:
             raise Http404
         if response.status_code != 200:
@@ -108,7 +147,11 @@ class AuthServiceApi(object):
     @staticmethod
     def get_device_user_permissions(hub_id, device_id):
         response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/user_permissions/" % (hub_id, device_id))
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/user_permissions/" % (hub_id, device_id),headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
+        )
         if response.status_code == 404:
             raise Http404
         if response.status_code != 200:
@@ -120,7 +163,12 @@ class AuthServiceApi(object):
     def get_device_group_permissions(hub_id, device_id):
         response = requests.get(
             AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/group_permissions/" % (
-            hub_id, device_id))
+            hub_id, device_id),
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
+        )
         if response.status_code == 404:
             raise Http404
         if response.status_code != 200:
@@ -132,7 +180,12 @@ class AuthServiceApi(object):
     def get_device_user_permission(hub_id, device_id, permission_id):
         response = requests.get(
             AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/user_permissions/%s" % (
-            hub_id, device_id, permission_id))
+            hub_id, device_id, permission_id),
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
+        )
         if response.status_code == 404:
             raise Http404
         if response.status_code != 200:
@@ -144,7 +197,12 @@ class AuthServiceApi(object):
     def get_device_group_permission(hub_id, device_id, permission_id):
         response = requests.get(
             AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/group_permissions/%s" % (
-                hub_id, device_id, permission_id))
+                hub_id, device_id, permission_id),
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
+        )
         if response.status_code == 404:
             raise Http404
         if response.status_code != 200:
@@ -157,7 +215,11 @@ class AuthServiceApi(object):
         response = requests.post(
             AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/user_permissions/" % (
             hub_id, device_id),
-            json=permission_obj
+            json=permission_obj,
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
         )
         if response.status_code == 404:
             raise Http404
@@ -171,7 +233,11 @@ class AuthServiceApi(object):
         response = requests.post(
             AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/group_permissions/" % (
                 hub_id, device_id),
-            json=permission_obj
+            json=permission_obj,
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
         )
         if response.status_code == 404:
             raise Http404
@@ -185,7 +251,11 @@ class AuthServiceApi(object):
         response = requests.put(
             AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/user_permissions/%s/" % (
                 hub_id, device_id, permission_id),
-            json=permission_obj
+            json=permission_obj,
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
         )
         if response.status_code == 404:
             raise Http404
@@ -199,7 +269,11 @@ class AuthServiceApi(object):
         response = requests.put(
             AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/group_permissions/%s/" % (
                 hub_id, device_id, permission_id),
-            json=permission_obj
+            json=permission_obj,
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
         )
         if response.status_code == 404:
             raise Http404
@@ -213,6 +287,10 @@ class AuthServiceApi(object):
         response = requests.delete(
             AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/user_permissions/%s/" % (
                 hub_id, device_id, permission_id),
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
         )
         if response.status_code == 404:
             raise Http404
@@ -226,6 +304,10 @@ class AuthServiceApi(object):
         response = requests.delete(
             AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/group_permissions/%s/" % (
                 hub_id, device_id, permission_id),
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
         )
         if response.status_code == 404:
             raise Http404
@@ -241,6 +323,10 @@ class AuthServiceApi(object):
             json={
                 'hub': hub_id,
                 'device_id': device.pk
+            },
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
             }
         )
         if response.status_code == 404:
@@ -256,6 +342,10 @@ class AuthServiceApi(object):
             json={
                 'hub': hub_id,
                 'device_id': device.pk
+            },
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
             }
         )
         if response.status_code == 404:
@@ -267,7 +357,11 @@ class AuthServiceApi(object):
     @staticmethod
     def has_read_permission(hub_id, device_id, user_id):
         response = requests.get(
-            AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/has_read_perm/%s/" % (hub_id, device_id, user_id)
+            AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/has_read_perm/%s/" % (hub_id, device_id, user_id),
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
         )
         if response.status_code == 404:
             raise Http404
@@ -280,7 +374,11 @@ class AuthServiceApi(object):
     def has_write_permission(hub_id, device_id, user_id):
         response = requests.get(
             AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/%s/has_write_perm/%s/" % (
-            hub_id, device_id, user_id)
+            hub_id, device_id, user_id),
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
         )
         if response.status_code == 404:
             raise Http404
@@ -293,7 +391,11 @@ class AuthServiceApi(object):
     def get_registered_devices_with_read_perm(hub_id, user_id):
         response = requests.get(
             AUTH_SERVICE_ADDRESS + "/api/hubs/%s/registred_devices/devices_with_read_permission/%s/" % (
-            hub_id, user_id)
+            hub_id, user_id),
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
         )
         if response.status_code == 404:
             raise Http404

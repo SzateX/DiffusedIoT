@@ -1,7 +1,12 @@
-from django.http import Http404
+import typing
+
+from django.http import Http404, HttpRequest
+from django.shortcuts import get_object_or_404
 from rest_framework import mixins, generics, status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework_api_key.permissions import BaseHasAPIKey
 
 from AuthServiceApp.serializers import *
 from AuthServiceApp.models import *
@@ -13,21 +18,46 @@ from rest_framework_simplejwt.views import TokenObtainPairView, \
 from django.db.models import Q
 
 
+class HasHubAPIKey(BaseHasAPIKey):
+    model = HubAPIKey
+
+    def has_permission(self, request: HttpRequest, view: typing.Any) -> bool:
+        assert self.model is not None, (
+                "%s must define `.model` with the API key model to use"
+                % self.__class__.__name__
+        )
+        key = self.get_key(request)
+        if not key:
+            return False
+        hub_id = request.META.get("HTTP_HUB_ID")
+        try:
+            hub = Hub.objects.get(pk=int(hub_id))
+        except Hub.DoesNotExist:
+            raise PermissionDenied("Unauthorized Hub")
+        api_keys = HubAPIKey.objects.order_by('-pk').filter(
+            hub=hub, revoked=False)
+        if not api_keys:
+            raise PermissionDenied("Unauthorized Hub")
+        api_key = api_keys[0]
+        return api_key.is_valid(key)
+
+
 class APIUserLoginView(TokenObtainPairView):
-    pass
+    permission_classes = [HasHubAPIKey]
 
 
 class APIRefreshUserToken(TokenRefreshView):
-    pass
+    permission_classes = [HasHubAPIKey]
 
 
 class APIVerifyUserToken(TokenVerifyView):
-    pass
+    permission_classes = [HasHubAPIKey]
 
 
 class HubView(mixins.RetrieveModelMixin, generics.GenericAPIView):
     queryset = Hub.objects.all()
     serializer_class = HubSerializer
+    permission_classes = [HasHubAPIKey]
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -36,17 +66,20 @@ class HubView(mixins.RetrieveModelMixin, generics.GenericAPIView):
 class HubListView(mixins.ListModelMixin, generics.GenericAPIView):
     queryset = Hub.objects.all()
     serializer_class = HubSerializer
+    permission_classes = [HasHubAPIKey]
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
 
 class HubValidApiKeyView(APIView):
+    permission_classes = [HasHubAPIKey]
+
     def get_object(self, pk):
         try:
             hub = Hub.objects.get(pk=pk)
             api_keys = HubAPIKey.objects.order_by('-pk').filter(
-                organization=hub, revoked=False)
+                hub=hub, revoked=False)
             if not api_keys:
                 raise Http404
             return api_keys[0]
@@ -68,6 +101,8 @@ class HubValidApiKeyView(APIView):
 
 
 class RegisterDeviceAPIView(APIView):
+    permission_classes = [HasHubAPIKey]
+
     def post(self, request, format=None):
         serializer = RegisterDeviceSerializer(data=request.data)
         if serializer.is_valid():
@@ -77,6 +112,8 @@ class RegisterDeviceAPIView(APIView):
 
 
 class UnregisterDeviceAPIView(APIView):
+    permission_classes = [HasHubAPIKey]
+
     def delete(self, request, format=None):
         serializer = RegisterDeviceSerializer(data=request.data)
         if serializer.is_valid():
@@ -93,6 +130,8 @@ class UnregisterDeviceAPIView(APIView):
 
 
 class UsersView(APIView):
+    permission_classes = [HasHubAPIKey]
+
     def get_object(self, pk):
         try:
             user = User.objects.get(pk=pk)
@@ -110,6 +149,8 @@ class UsersView(APIView):
 
 
 class GroupsView(APIView):
+    permission_classes = [HasHubAPIKey]
+
     def get_object(self, pk):
         try:
             user = Group.objects.get(pk=pk)
@@ -127,6 +168,8 @@ class GroupsView(APIView):
 
 
 class DeviceUserPermissionsView(APIView):
+    permission_classes = [HasHubAPIKey]
+
     def get_object(self, model, **kwargs):
         try:
             return model.objects.get(**kwargs)
@@ -178,6 +221,8 @@ class DeviceUserPermissionsView(APIView):
 
 
 class DeviceGroupPermissionsView(APIView):
+    permission_classes = [HasHubAPIKey]
+
     def get_object(self, model, **kwargs):
         try:
             return model.objects.get(**kwargs)
@@ -229,6 +274,8 @@ class DeviceGroupPermissionsView(APIView):
 
 
 class DeviceUserPermissionListView(APIView):
+    permission_classes = [HasHubAPIKey]
+
     def get_object(self, model, **kwargs):
         try:
             return model.objects.get(**kwargs)
@@ -249,6 +296,8 @@ class DeviceUserPermissionListView(APIView):
 
 
 class DeviceGroupPermissionListView(APIView):
+    permission_classes = [HasHubAPIKey]
+
     def get_object(self, model, **kwargs):
         try:
             return model.objects.get(**kwargs)
@@ -276,6 +325,8 @@ class DeviceGroupPermissionListView(APIView):
 
 
 class HasReadPermissionForDevice(APIView):
+    permission_classes = [HasHubAPIKey]
+
     def get_object(self, model, **kwargs):
         try:
             return model.objects.get(**kwargs)
@@ -296,6 +347,8 @@ class HasReadPermissionForDevice(APIView):
 
 
 class HasWritePermissionForDevice(APIView):
+    permission_classes = [HasHubAPIKey]
+
     def get_object(self, model, **kwargs):
         try:
             return model.objects.get(**kwargs)
@@ -316,6 +369,8 @@ class HasWritePermissionForDevice(APIView):
 
 
 class RegistredDevicesWithReadPermission(APIView):
+    permission_classes = [HasHubAPIKey]
+
     def get_object(self, model, **kwargs):
         try:
             return model.objects.get(**kwargs)
@@ -340,7 +395,7 @@ class RegistredDevicesWithReadPermission(APIView):
 
 
 class GetMe(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated & HasHubAPIKey]
 
     def get(self, request, format=None):
         return Response(MeSerializer(self.request.user).data)

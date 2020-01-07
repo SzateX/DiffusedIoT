@@ -3,7 +3,7 @@ import json
 import requests
 from django.http import Http404
 from django.utils import timezone
-from rest_framework import status
+from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -18,6 +18,10 @@ from .serializers import DeviceSerializer, DeviceUnitSerializer, \
     ConnectedUnitSerializer, ConnectedUnitSaveSerializer, DataSerializer, \
     TemperatureUnitValueSerializer, HumidityUnitValueSerializer, \
     SwitchUnitValueSerializer
+
+class IsAuthorizedHub(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        pass
 
 
 class DevicesApiForUserView(APIView):
