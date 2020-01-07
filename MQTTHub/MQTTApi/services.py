@@ -8,6 +8,23 @@ from MQTTHub.settings import AUTH_SERVICE_ADDRESS, API_KEY, HUB_ID
 
 class AuthServiceApi(object):
     @staticmethod
+    def verify_hub_api_key(hub_id, api_key):
+        response = requests.get(
+            AUTH_SERVICE_ADDRESS + "/api/hubs/validate_api_key/%s/" % hub_id,
+            json={
+                'api_key': api_key
+            },
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
+        )
+        if response.status_code != 200:
+            raise Exception("Error in connection with AuthService: "
+                            + response.text)
+        return response.json()
+
+    @staticmethod
     def verify_token(request):
         response = requests.post(
             AUTH_SERVICE_ADDRESS + "/api/user_auth/verify_token/",
@@ -411,7 +428,9 @@ class InternalApi(object):
         response = requests.get(
             hub['private_address'] + "/hub/internal_api/devices_for_user/",
             headers={
-                'Authorization': "Bearer " + token
+                'Authorization': "Bearer " + token,
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
             }
         )
         if response.status_code == 404:
@@ -426,7 +445,9 @@ class InternalApi(object):
         response = requests.post(
             hub['private_address'] + "/hub/internal_api/devices_for_user/",
             headers={
-                'Authorization': "Bearer " + token
+                'Authorization': "Bearer " + token,
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
             },
             json={
                 'name':  form.cleaned_data['name'],
@@ -444,7 +465,9 @@ class InternalApi(object):
         response = requests.get(
             hub['private_address'] + "/hub/internal_api/devices_for_user/%s/" % device_id,
             headers={
-                'Authorization': token
+                'Authorization': token,
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
             },
         )
         if response.status_code == 404:
@@ -459,7 +482,9 @@ class InternalApi(object):
         response = requests.put(
             hub['private_address'] + "/hub/internal_api/devices_for_user/%s/" % device_id,
             headers={
-                'Authorization': token
+                'Authorization': token,
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
             },
             json={
                 'name': form.cleaned_data['name'],
@@ -478,7 +503,9 @@ class InternalApi(object):
             hub[
                 'private_address'] + "/hub/internal_api/devices_for_user/%s/" % device_id,
             headers={
-                'Authorization': token
+                'Authorization': token,
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
             },
         )
         if response.status_code == 404:
@@ -492,7 +519,9 @@ class InternalApi(object):
         response = requests.get(
             hub['private_address'] + "/hub/internal_api/devices_for_user/%s/units/" % device_id,
             headers={
-                'Authorization': token
+                'Authorization': token,
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
             },
         )
         if response.status_code == 404:
@@ -508,7 +537,9 @@ class InternalApi(object):
             hub[
                 'private_address'] + "/hub/internal_api/devices_for_user/%s/units/%s/" % (device_id, pk),
             headers={
-                'Authorization': token
+                'Authorization': token,
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
             },
         )
         if response.status_code == 404:
@@ -524,7 +555,9 @@ class InternalApi(object):
             hub[
                 'private_address'] + "/hub/internal_api/devices_for_user/%s/units/" % device_id,
             headers={
-                'Authorization': token
+                'Authorization': token,
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
             },
             json=cleaned_data
         )
@@ -541,7 +574,9 @@ class InternalApi(object):
             hub[
                 'private_address'] + "/hub/internal_api/devices_for_user/%s/units/%s/" % (device_id, pk),
             headers={
-                'Authorization': token
+                'Authorization': token,
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
             },
             json=cleaned_data
         )
@@ -559,7 +594,9 @@ class InternalApi(object):
                 'private_address'] + "/hub/internal_api/devices_for_user/%s/units/%s/" % (
             device_id, pk),
             headers={
-                'Authorization': token
+                'Authorization': token,
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
             },
         )
         if response.status_code == 404:
@@ -575,7 +612,9 @@ class InternalApi(object):
             hub[
                 'private_address'] + "/hub/internal_api/connected_units/from_unit/%s/" % with_unit,
             headers={
-                'Authorization': token
+                'Authorization': token,
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
             },
         )
         if response.status_code == 404:
@@ -591,7 +630,9 @@ class InternalApi(object):
             hub[
                 'private_address'] + "/hub/internal_api/connected_units/from_unit/%s/%s/" % (with_unit, unit),
             headers={
-                'Authorization': token
+                'Authorization': token,
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
             },
         )
         if response.status_code == 404:
@@ -607,7 +648,9 @@ class InternalApi(object):
             hub[
                 'private_address'] + "/hub/internal_api/connected_units/",
             headers={
-                'Authorization': token
+                'Authorization': token,
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
             },
             json=cleaned_data
         )
@@ -625,7 +668,9 @@ class InternalApi(object):
                 'private_address'] + "/hub/internal_api/connected_units/%s/" % (
                 pk),
             headers={
-                'Authorization': token
+                'Authorization': token,
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
             },
         )
         if response.status_code == 404:
@@ -652,7 +697,9 @@ class InternalApi(object):
         response = requests.get(
             hub['private_address'] + "/hub/internal_api/devices_for_user/%s/units/%s/data/" % (device_id, unit_id),
             headers={
-                'Authorization': token
+                'Authorization': token,
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
             }
         )
 

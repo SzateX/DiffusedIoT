@@ -88,7 +88,6 @@ class HubValidApiKeyView(APIView):
 
     def get(self, request, pk, format=None):
         api_key = self.get_object(pk)
-        print(request.data)
         serializer = HubApiKeySerializer(data=request.data)
         if serializer.is_valid():
             data = {

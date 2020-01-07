@@ -4,6 +4,7 @@ import requests
 from django.http import Http404
 from django.utils import timezone
 from rest_framework import status, permissions
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -19,12 +20,22 @@ from .serializers import DeviceSerializer, DeviceUnitSerializer, \
     TemperatureUnitValueSerializer, HumidityUnitValueSerializer, \
     SwitchUnitValueSerializer
 
+
 class IsAuthorizedHub(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        pass
+    def has_permission(self, request, view):
+        key = request.META.get("HTTP_X_API_KEY")
+        if key is None:
+            raise PermissionDenied("Unauthorized Hub")
+        hub_id = request.META.get("HTTP_HUB_ID")
+        if hub_id is None:
+            raise PermissionDenied("Unauthorized Hub")
+        response = AuthServiceApi.verify_hub_api_key(hub_id, key)
+        return response['is_valid']
 
 
 class DevicesApiForUserView(APIView):
+    permission_classes = [IsAuthorizedHub]
+
     def get(self, request, pk=None, format=None):
         if pk is None:
             return self.get_all(request, format)
@@ -92,6 +103,8 @@ class DevicesApiForUserView(APIView):
 
 
 class DeviceUnitsApiView(APIView):
+    permission_classes = [IsAuthorizedHub]
+
     def get(self, request, device, pk=None, format=None):
         me = AuthServiceApi.get_me(self.request.headers.get('Authorization'))
         device_obj = Device.objects.get(pk=device)
@@ -156,6 +169,8 @@ class DeviceUnitsApiView(APIView):
 
 
 class ConnectedUnitApiView(APIView):
+    permission_classes = [IsAuthorizedHub]
+
     def get(self, request, from_unit, pk=None, format=None):
         me = AuthServiceApi.get_me(self.request.headers.get('Authorization'))
         if not me['is_staff']:
@@ -199,6 +214,8 @@ class ConnectedUnitApiView(APIView):
 
 
 class IncomingDataToUnitApiView(APIView):
+    permission_classes = [IsAuthorizedHub]
+
     def post(self, request, format=None):
         serializer = DataSerializer(data=request.data)
         try:
@@ -236,6 +253,8 @@ class IncomingDataToUnitApiView(APIView):
 
 
 class GetDataFromUnitView(APIView):
+    permission_classes = [IsAuthorizedHub]
+
     def get(self, request, device, pk, format=None):
         me = AuthServiceApi.get_me(self.request.headers.get('Authorization'))
         if not me['is_staff']:
