@@ -27,11 +27,9 @@
                     <td>{{ user_perm.read_permission }}</td>
                     <td>{{ user_perm.write_permission }}</td>
                     <td>
-                        <a href="{% url 'update_user_permission' hub device.pk user_perm.pk %}"
-                           class="waves-effect waves-light btn">Edit <i
+                        <a href="{% url 'update_user_permission' hub device.pk user_perm.pk %}">Edit <i
                                 class="small material-icons">edit</i></a>
-                        <a href="{% url 'delete_user_permission' hub device.pk user_perm.pk %}"
-                           class="waves-effect waves-light btn">Delete <i
+                        <a href="{% url 'delete_user_permission' hub device.pk user_perm.pk %}">Delete <i
                                 class="small material-icons">remove_circle</i></a>
                     </td>
                 </tr>
@@ -60,11 +58,9 @@
                     <td>{{ group_perm.read_permission }}</td>
                     <td>{{ group_perm.write_permission }}</td>
                     <td>
-                    <a href="{% url 'update_group_permission' hub device.pk group_perm.pk %}"
-                       class="waves-effect waves-light btn">Edit <i
+                    <a href="{% url 'update_group_permission' hub device.pk group_perm.pk %}">Edit <i
                                 class="small material-icons">edit</i></a>
-                    <a href="{% url 'delete_group_permission' hub device.pk group_perm.pk %}"
-                       class="waves-effect waves-light btn">Delete <i
+                    <a href="{% url 'delete_group_permission' hub device.pk group_perm.pk %}">Delete <i
                                 class="small material-icons">remove_circle</i></a>
                     </td>
                 </tr>

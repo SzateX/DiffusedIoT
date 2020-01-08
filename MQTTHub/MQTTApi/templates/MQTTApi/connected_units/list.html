@@ -41,8 +41,7 @@
                     <td>{{ connected_unit.dest_hub }}</td>
                     <td>{{ connected_unit.dest_device }}</td>
                     <td>{{ connected_unit.dest_unit }}</td>
-                    <td><a href="{% url 'connected_unit_delete' hub.pk device.pk unit.pk connected_unit.pk %}"
-                         class="waves-effect waves-light btn-small">Delete<i
+                    <td><a href="{% url 'connected_unit_delete' hub.pk device.pk unit.pk connected_unit.pk %}">Delete<i
                             class="material-icons right">remove_circle</i></a></td>
                 </tr>
             {% endfor %}

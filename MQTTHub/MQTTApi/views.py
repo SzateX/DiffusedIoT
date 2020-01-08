@@ -148,6 +148,7 @@ class HubDeviceView(HubLoginRequiredMixin, TemplateView):
         context = super(HubDeviceView, self).get_context_data(**kwargs)
         context['devices'] = self.devices
         context['hub'] = self.hub
+        context['user'] = self.user
         return context
 
 

@@ -7,16 +7,20 @@
         Private Address: {{ hub.private_address }}<br>
         Public Address: {{ hub.public_address }}
     </div>
+    {% if user.is_staff %}
     <a href="{% url 'hub_devices_add' hub.pk %}"
        class="waves-effect waves-light btn-small">Add Device<i
             class="material-icons right">add</i></a><br>
+    {% endif %}
     <table>
         <thead>
         <tr>
             <th>Id</th>
             <th>Name</th>
             <th>Type of Device</th>
-            <th>Actions</th>
+            {% if user.is_staff %}
+                <th>Actions</th>
+            {% endif %}
         </tr>
         </thead>
         <tbody>
@@ -29,15 +33,13 @@
                     <a href="{% url 'device_units' hub.pk device.pk %}">{{ device.name }}</a>
                 </td>
                 <td>{{ device.type_of_device }}</td>
-                <td><a href="{% url 'hub_devices_update' hub.pk device.pk %}"
-                       class="waves-effect waves-light btn">Edit Device<i
+                {% if user.is_staff %}
+                <td><a href="{% url 'hub_devices_update' hub.pk device.pk %}">Edit Device<i
                         class="small material-icons">edit</i></a>
-                    <a href="{% url 'hub_devices_delete' hub.pk device.pk %}"
-                         class="waves-effect waves-light btn">Delete Device<i
-                            class="material-icons right">remove_circle</i></a>
-                    <a href="{% url 'hub_device_permissions' hub.pk device.pk %}"
-                       class="waves-effect waves-light btn">Access Rules<i
+                    <a href="{% url 'hub_devices_delete' hub.pk device.pk %}">Delete Device<i class="small material-icons">remove_circle</i></a>
+                    <a href="{% url 'hub_device_permissions' hub.pk device.pk %}">Access Rules<i
                             class="small material-icons">security</i></a></td>
+                {% endif %}
             </tr>
         {% endfor %}
         </tbody>
