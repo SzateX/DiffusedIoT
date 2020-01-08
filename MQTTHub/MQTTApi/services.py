@@ -684,7 +684,11 @@ class InternalApi(object):
     def send_data_to_unit(hub, data):
         response = requests.post(
             hub['private_address'] + "/hub/internal_api/connected_units/send_data/",
-            json=data
+            json=data,
+            headers={
+                'X-API-Key': API_KEY,
+                'HUB-ID': str(HUB_ID)
+            }
         )
         if response.status_code == 404:
             raise Http404
