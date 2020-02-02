@@ -8,6 +8,7 @@ from MQTTApi.services import InternalApi, AuthServiceApi
 from .enums import DeviceType
 from drivers.GTS.driver import driver_function
 from drivers.GTS.driver import incoming_function
+from config import MQTT_BROKER
 
 models = None
 serializers = None
@@ -71,8 +72,8 @@ def mqtt_incoming(device, unit, unit_values):
     s = json.dumps(obj)
     client = mqtt.Client()
 
-    client.connect("test.mosquitto.org", 1883, 60)
-    client.publish('inzynierkav2/sender', payload=s)
+    client.connect(MQTT_BROKER, 1883, 60)
+    client.publish('DiffusedIoT/sender', payload=s)
     client.disconnect()
 
 

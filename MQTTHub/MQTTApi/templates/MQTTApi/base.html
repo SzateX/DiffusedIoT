@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Hub - dashboard</title>
+    <title>Diffused IoT Hub - Dashboard</title>
     <!--Import Google Icon Font-->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!--Import materialize.css-->
@@ -25,7 +25,7 @@
 <body>
   <nav class="light-green darken-3">
     <div class="nav-wrapper container">
-      <a href="{% url 'hub_dashboard' %}" class="brand-logo">Hub - Dashboard</a>
+      <a href="{% url 'hub_dashboard' %}" class="brand-logo">Diffused IoT Hub - Dashboard</a>
         {% if request.COOKIES.user_token %}
         <ul id="nav-mobile" class="right hide-on-med-and-down">
             <li><a href="{% url 'hub_logout' %}">Logout</a></li>

@@ -188,7 +188,7 @@ class HubCreateView(UserPassesTestMixin, CreateView):
     template_name = "AuthService/hubs/create.html"
     model = Hub
     success_url = "/authService/dashboard/hubs"
-    fields = ['name', 'private_address', 'public_address']
+    fields = ('name', 'private_address', 'public_address')
 
     def test_func(self):
         return self.request.user.is_staff
@@ -205,7 +205,7 @@ class HubUpdateView(UserPassesTestMixin, UpdateView):
     template_name = "AuthService/hubs/update.html"
     model = Hub
     success_url = "/authService/dashboard/hubs"
-    fields = ['name', 'private_address', 'public_address']
+    fields = ('name', 'private_address', 'public_address')
 
     def test_func(self):
         return self.request.user.is_staff

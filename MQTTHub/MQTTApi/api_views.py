@@ -273,13 +273,13 @@ class GetDataFromUnitView(APIView):
             raise Http404
 
         if unit.type_of_unit == UnitType.HUMIDITY_UNIT:
-            objs = HumidityUnitValue.objects.order_by('-timestamp')[:50]
+            objs = HumidityUnitValue.objects.filter(device_unit=unit).order_by('-timestamp')[:50]
             serializer = HumidityUnitValueSerializer(objs, many=True)
         elif unit.type_of_unit == UnitType.TEMPERATURE_UNIT:
-            objs = TemperatureUnitValue.objects.order_by('-timestamp')[:50]
+            objs = TemperatureUnitValue.objects.filter(device_unit=unit).order_by('-timestamp')[:50]
             serializer = TemperatureUnitValueSerializer(objs, many=True)
         elif unit.type_of_unit == UnitType.SWITCH_UNIT:
-            objs = SwitchUnitValue.objects.order_by('-timestamp')[:50]
+            objs = SwitchUnitValue.objects.filter(device_unit=unit).order_by('-timestamp')[:50]
             serializer = SwitchUnitValueSerializer(objs, many=True)
         else:
             raise Exception("Bad Unit Type")

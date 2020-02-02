@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>AuthService - dashboard</title>
+    <title>Diffused IoT AuthService - Dashboard</title>
     <!--Import Google Icon Font-->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!--Import materialize.css-->
@@ -14,7 +14,7 @@
 <body>
   <nav>
     <div class="nav-wrapper container">
-      <a href="{% url 'dashboard' %}" class="brand-logo">AuthService -&nbsp;Dashboard</a>
+      <a href="{% url 'dashboard' %}" class="brand-logo">Diffused IoT AuthService - Dashboard</a>
         {% if user.is_authenticated %}
         <ul id="nav-mobile" class="right hide-on-med-and-down">
             <li><a href="{% url 'logout' %}">Logout</a></li>
@@ -22,6 +22,11 @@
         {% endif %}
     </div>
     </nav>
+  {% if user.is_authenticated %}
+     <ul id="slide-out" class="sidenav">
+            <li><a href="{% url 'logout' %}">Logout</a></li>
+    </ul>
+  {% endif %}
   <div class="container">
     {% block content %}
     {% endblock %}
@@ -32,6 +37,10 @@
         var elems = document.querySelectorAll('select');
         var instances = M.FormSelect.init(elems, {});
         });
+        document.addEventListener('DOMContentLoaded', function() {
+            var elems = document.querySelectorAll('.sidenav');
+            var instances = M.Sidenav.init(elems, {});
+          });
     </script>
 </body>
 </html>

@@ -1,4 +1,5 @@
 {% extends 'MQTTApi/base.html' %}
+{% load datetime_utils %}
 {% block content %}
     <h3>Connected units for:</h3>
     <div class="row">
@@ -36,7 +37,7 @@
         <tbody>
             {% for value in data %}
                 <tr>
-                    <td>{{ value.timestamp }}</td>
+                    <td>{{ value.timestamp|from_iso|date:"Y M d, H:i:s"}}</td>
                     <td>{{ value.incoming }}</td>
                     <td>{{ value.value }}</td>
                     {% if has_unit %}

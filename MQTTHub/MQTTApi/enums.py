@@ -14,6 +14,7 @@ class UnitType:
     SWITCH_UNIT = 'switch'
     TEMPERATURE_UNIT = 'temperature'
     HUMIDITY_UNIT = 'humidity'
+    UNKNOWN_UNIT = 'unknown'
 
 
 class TemperatureUnit:

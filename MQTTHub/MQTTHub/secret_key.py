@@ -1,0 +1,1 @@
+SECRET_KEY = '_f^f^2=439fyzt2-!u=408^s(h+5ne_n8mihrnmtat-9w*q!c1'

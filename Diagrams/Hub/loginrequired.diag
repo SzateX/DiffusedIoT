@@ -1,0 +1,11 @@
+diagram {
+    User -> Hub [label = "Any Request labeled as Login Required"];
+            Hub -> AuthService [label = "POST /api/user_auth/verify_token/"];
+            Hub <-- AuthService [label = "[InvalidToken] 403 Forbidden"];
+    User <-- Hub [label = "Redirect to Login Page"];
+            === Valid Token ===
+     User -> Hub [label = "Any Request labeled as Login Required"];
+            Hub -> AuthService [label = "POST /api/user_auth/verify_token/"];
+            Hub <-- AuthService [label = "[Valid Token] 200 OK"];
+            ... Continue Processing Request ...
+}

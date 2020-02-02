@@ -1,0 +1,16 @@
+diagram {
+    User -> Hub [label = "GET /login/"];
+    User <-- Hub[label = "Form"];
+    User -> Hub [label = "POST /login/"];
+            Hub -> AuthService [label = "POST /api/user_auth/sign_in/"]
+            Hub <-- AuthService [label = "[Correct Credentials] 200 OK"];
+    User <-- Hub [label = "Redirect To Success Url"];
+
+    === Incorrect Credentials ===
+
+    User -> Hub [label = "POST /login/"];
+            Hub -> AuthService [label = "POST /api/user_auth/sign_in/"]
+            Hub <-- AuthService [label = "[Incorrect Credentials] 403 Forbidden"];
+    User <-- Hub [label = "Form with errors"];
+
+}

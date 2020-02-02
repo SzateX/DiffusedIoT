@@ -1,11 +1,12 @@
 {% extends 'AuthService/base.html' %}
+{% load static %}
 {% block content %}
         <h3>Main Menu</h3>
         <div class="row center-row">
             <div class="col m3">
                 <div class="card">
                     <div class="card-image">
-                        <a href="{% url 'users' %}"><img class="responsive-img" src="http://via.placeholder.com/150x150">
+                        <a href="{% url 'users' %}"><img class="responsive-img" src="{% static 'dashboard/img/button.png' %}">
                             <span class="card-title center-align width-100">Users</span></a>
                     </div>
                 </div>
@@ -13,7 +14,7 @@
             <div class="col m3">
                 <div class="card">
                     <div class="card-image">
-                        <a href="{% url 'groups' %}"><img class="responsive-img" src="http://via.placeholder.com/150x150">
+                        <a href="{% url 'groups' %}"><img class="responsive-img" src="{% static 'dashboard/img/button.png' %}">
                             <span class="card-title center-align width-100">Groups</span></a>
                     </div>
                 </div>
@@ -21,7 +22,7 @@
             <div class="col m3">
                 <div class="card">
                     <div class="card-image">
-                        <a href="{% url 'hubs' %}"><img class="responsive-img" src="http://via.placeholder.com/150x150">
+                        <a href="{% url 'hubs' %}"><img class="responsive-img" src="{% static 'dashboard/img/button.png' %}">
                             <span class="card-title center-align width-100">Hubs</span></a>
                     </div>
                 </div>

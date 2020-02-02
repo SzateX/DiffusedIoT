@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+from .secret_key import SECRET_KEY
+import config
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,7 +22,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '_f^f^2=439fyzt2-!u=408^s(h+5ne_n8mihrnmtat-9w*q!c1'
+SECRET_KEY = SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -75,12 +77,7 @@ WSGI_APPLICATION = 'MQTTHub.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
+DATABASES = config.DATABASES
 
 
 # Password validation
@@ -121,9 +118,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-AUTH_SERVICE_ADDRESS = "http://127.0.0.1:8000/authService"
-HUB_ID = 1
-API_KEY = '6srjeRxV.492Us8hDpYtDPcNJgCpcgfN04eQo08bT'
+AUTH_SERVICE_ADDRESS = config.AUTH_SERVICE_ADDRESS
+HUB_ID = config.HUB_ID
+API_KEY = config.API_KEY
+MQTT_BROKER = config.MQTT_BROKER
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

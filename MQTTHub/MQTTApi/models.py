@@ -23,7 +23,8 @@ class DeviceUnit(models.Model):
     TYPE_CHOICES = (
         (UnitType.HUMIDITY_UNIT, 'Humidity Unit'),
         (UnitType.TEMPERATURE_UNIT, 'Temperature Unit'),
-        (UnitType.SWITCH_UNIT, 'Switch Unit')
+        (UnitType.SWITCH_UNIT, 'Switch Unit'),
+        (UnitType.UNKNOWN_UNIT, 'Unknown Unit')
     )
     device = models.ForeignKey(Device, on_delete=models.CASCADE,
                                related_name='units',
@@ -64,6 +65,11 @@ class HumidityUnitValue(GenericUnitValue):
     value = models.DecimalField(decimal_places=2, max_digits=10)
     unit = models.CharField(choices=UNIT_CHOICES,
                             max_length=200)
+
+
+class UnknownUnitValue(GenericUnitValue):
+    value = models.DecimalField(decimal_places=2, max_digits=10)
+    unit = models.CharField(blank=True, null=True, max_length=200)
 
 
 class ConnectedUnit(models.Model):

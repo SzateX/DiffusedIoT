@@ -19,10 +19,9 @@ client.connect("test.mosquitto.org", 1883, 60)
 client.loop_start()
 
 while True:
+    t = int(input("Wprowadz liczbę:"))
     client.publish('inzynierkav2/listener', payload=json.dumps({
         'device': 11,
         'unit': 4,
-        'data': {'temperature': 42}
+        'data': {'temperature': t}
     }))
-
-    input()

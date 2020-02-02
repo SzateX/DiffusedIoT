@@ -38,8 +38,10 @@ class HasHubAPIKey(BaseHasAPIKey):
             hub=hub, revoked=False)
         if not api_keys:
             raise PermissionDenied("Unauthorized Hub")
-        api_key = api_keys[0]
-        return api_key.is_valid(key)
+        for api_key in api_keys:
+            if api_key.is_valid(key):
+                return True
+        return False
 
 
 class APIUserLoginView(TokenObtainPairView):
