@@ -1,6 +1,7 @@
 from django.contrib.auth.forms import UsernameField
 from django import forms
 import requests
+from django.forms import BooleanField
 from django.urls import resolve, reverse
 
 from MQTTApi.models import Device, DeviceUnit, TemperatureUnitValue, \
@@ -75,6 +76,8 @@ class HumidityUnitValueForm(forms.ModelForm):
 
 
 class SwitchUnitValueForm(forms.ModelForm):
+    value = BooleanField(required=False, help_text="Turn on or off")
+
     class Meta:
         model = SwitchUnitValue
         fields = ('value', )

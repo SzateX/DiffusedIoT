@@ -806,15 +806,15 @@ class UnitDataView(HubLoginRequiredMixin, FormView):
                                        **form.cleaned_data)
             serializer_obj = json.dumps(
                 serializers.SwitchUnitValueSerializer(obj).data)
-            prepared_objs = [{'data': serializer_obj,
-                              'type': 'SwitchUnitValue'}]
+            prepared_objs = [json.dumps({'data': serializer_obj,
+                              'type': 'SwitchUnitValue'})]
         elif self.unit['type_of_unit'] == UnitType.HUMIDITY_UNIT:
             obj = HumidityUnitValue(timestamp=timezone.now(), incoming=True,
                                        **form.cleaned_data)
             serializer_obj = json.dumps(
                 serializers.HumidityUnitValueSerializer(obj).data)
-            prepared_objs = [{'data': serializer_obj,
-                              'type': 'HumidityUnitValue'}]
+            prepared_objs = [json.dumps({'data': serializer_obj,
+                              'type': 'HumidityUnitValue'})]
         else:
             raise Exception("Invalid Type Of Device")
         payload = {

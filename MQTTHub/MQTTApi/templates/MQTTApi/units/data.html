@@ -1,7 +1,7 @@
 {% extends 'MQTTApi/base.html' %}
 {% load datetime_utils %}
 {% block content %}
-    <h3>Connected units for:</h3>
+    <h3>Data of unit:</h3>
     <div class="row">
         <h5>Hub:</h5>
         Id: {{ hub.pk }}<br>
@@ -49,7 +49,7 @@
     </table>
     {% if has_write_perms %}
         <h5>Send data to unit, and connected units:</h5>
-        <form method="post">{% csrf_token %}
+        <form method="post" class=".browser-default">{% csrf_token %}
                 {{ form.as_p }}
                 <button class="btn waves-effect waves-light" type="submit" name="action">Submit
                     <i class="material-icons right">send</i>

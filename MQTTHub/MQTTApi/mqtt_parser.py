@@ -6,8 +6,8 @@ import paho.mqtt.client as mqtt
 
 from MQTTApi.services import InternalApi, AuthServiceApi
 from .enums import DeviceType
-from drivers.GTS.driver import driver_function
-from drivers.GTS.driver import incoming_function
+import drivers.GTS.driver
+import drivers.GL.driver
 from config import MQTT_BROKER
 
 models = None
@@ -17,6 +17,7 @@ serializers = None
 def mqtt_callback(client, userdata, message):
     global models
     global serializers
+    print(message)
     obj = json.loads(message.payload)
     if 'device' not in obj or 'unit' not in obj or 'data' not in obj:
         return
@@ -27,9 +28,9 @@ def mqtt_callback(client, userdata, message):
     if device.type_of_device == DeviceType.GENERIC_HUMIDITY_SENSOR:
         return
     elif device.type_of_device == DeviceType.GENERIC_TEMPERATURE_SENSOR:
-        objs = driver_function(models, unit, obj['data'])
+        objs = drivers.GTS.driver.driver_function(models, unit, obj['data'])
     elif device.type_of_device == DeviceType.GENERIC_LAMP:
-        return
+        objs = drivers.GL.driver.driver_function(models, unit, obj['data'])
     else:
         return
 
@@ -58,13 +59,20 @@ def mqtt_incoming(device, unit, unit_values):
     global models
     global serializers
 
+    print("mqtt_incoming")
+
     if device.type_of_device == DeviceType.GENERIC_TEMPERATURE_SENSOR:
-        obj = incoming_function(unit_values)
+        obj = drivers.GTS.driver.incoming_function(unit_values)
+    elif device.type_of_device == DeviceType.GENERIC_LAMP:
+        obj = drivers.GL.driver.incoming_function(unit_values)
     else:
         return
 
-    for unit_value in unit_values:
-        unit_value.save()
+    try:
+        for unit_value in unit_values:
+            unit_value.save()
+    except Exception as e:
+        pass
 
     obj['device'] = device.pk
     obj['unit'] = unit.pk

@@ -15,13 +15,14 @@ client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
 
-client.connect("test.mosquitto.org", 1883, 60)
+client.connect_async("test.mosquitto.org", 1883, 60)
 client.loop_start()
 
 while True:
     t = int(input("Wprowadz liczbę:"))
-    client.publish('inzynierkav2/listener', payload=json.dumps({
-        'device': 11,
-        'unit': 4,
+    r = client.publish('DiffusedIoT/listener', payload=json.dumps({
+        'device': 14,
+        'unit': 9,
         'data': {'temperature': t}
     }))
+    print(r)

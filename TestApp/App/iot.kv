@@ -31,15 +31,18 @@
 <IoTWidget>:
     new_value: value_input.text
     device: device_input.text
+    raspberry_values: r_values
+    beaglebone_values: b_values
     GridLayout:
         size: root.size
         rows: 2
         GridLayout:
             cols: 2
             ValuesWidget:
+                id: r_values
                 title: "Raspberry"
-                activated: True
             ValuesWidget:
+                id: b_values
                 title: "Beaglebone"
         BoxLayout:
             size_hint_y: 0.5

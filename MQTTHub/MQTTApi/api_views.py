@@ -241,6 +241,13 @@ class IncomingDataToUnitApiView(APIView):
                         else:
                             return Response(serializer.errors,
                                             status=status.HTTP_400_BAD_REQUEST)
+                    elif t == 'SwitchUnitValue':
+                        serializer = SwitchUnitValueSerializer(data=d)
+                        if serializer.is_valid():
+                            obj = SwitchUnitValue(device_unit=unit, incoming=True, **serializer.validated_data)
+                            objs.append(obj)
+                        else:
+                            return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
                     else:
                         return Response({'error': 'Invalid type'},
                                         status=status.HTTP_400_BAD_REQUEST)
