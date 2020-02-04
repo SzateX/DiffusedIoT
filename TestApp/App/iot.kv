@@ -1,0 +1,71 @@
+#:kivy 1.0.9
+
+<ValuesWidget>:
+    rows:4
+    Label:
+        font_size: 45
+        text: root.title
+        bold: True
+    GridLayout:
+        cols:2
+        rows:2
+        Label:
+            text: "Akt.:"
+            font_size: 25
+        Label:
+            text: "Zad.:"
+            font_size: 25
+        Label:
+            text: str(root.current)
+            font_size: 35
+        Label:
+            text: str(root.setted)
+            font_size: 35
+    StackLayout:
+        Label:
+            text: "Nadmuch: [size=35]" + ("[color=#00ff00][b]ON[/b][/color]" if root.activated else "[color=#ff0000][b]OFF[/b][/color]") + "[/size]"
+            font_size: 25
+            markup: True
+
+
+<IoTWidget>:
+    new_value: value_input.text
+    device: device_input.text
+    GridLayout:
+        size: root.size
+        rows: 2
+        GridLayout:
+            cols: 2
+            ValuesWidget:
+                title: "Raspberry"
+                activated: True
+            ValuesWidget:
+                title: "Beaglebone"
+        BoxLayout:
+            size_hint_y: 0.5
+            orientation: 'vertical'
+            GridLayout:
+                cols: 2
+                Label:
+                    text: "Wartosc: "
+                    font_size: 25
+                TextInput:
+                    id: value_input
+                    multiline: False
+                    font_size: 35
+                    text: "50"
+                    valign: 'middle'
+                    halign: 'center'
+                Label
+                    text: "Wyslij na: "
+                    font_size: 25
+                Spinner
+                    id: device_input
+                    text: "Raspberry"
+                    values: "Raspberry", "Beaglebone"
+                    font_size: 35
+                StackLayout
+                Button
+                    text: "Wyslij"
+                    font_size: 25
+                    on_release: root.send_data_callback()
