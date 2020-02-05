@@ -62,15 +62,12 @@ def mqtt_callback(client, userdata, message):
         }
         try:
             hub = AuthServiceApi.get_hub(connected_unit.dest_hub)
-            print(hub)
         except Exception as e:
             print(e)
         try:
             InternalApi.send_data_to_unit(hub, payload)
         except Exception as e:
             print(e)
-
-    print("DUPA3")
 
 
 def mqtt_incoming(device, unit, unit_values):
