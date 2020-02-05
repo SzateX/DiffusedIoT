@@ -60,7 +60,10 @@ def mqtt_callback(client, userdata, message):
             'unit': connected_unit.dest_unit,
             'data': prepared_objs
         }
-        hub = AuthServiceApi.get_hub(connected_unit.dest_hub)
+        try:
+            hub = AuthServiceApi.get_hub(connected_unit.dest_hub)
+        except Exception as e:
+            print(e)
         try:
             InternalApi.send_data_to_unit(hub, payload)
         except Exception as e:
