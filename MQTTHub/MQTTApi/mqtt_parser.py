@@ -62,6 +62,7 @@ def mqtt_callback(client, userdata, message):
         }
         try:
             hub = AuthServiceApi.get_hub(connected_unit.dest_hub)
+            print(hub)
         except Exception as e:
             print(e)
         try:
