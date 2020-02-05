@@ -43,6 +43,11 @@ def mqtt_callback(client, userdata, message):
             prepared_obj = {'data': serializer_obj,
                             'type': 'TemperatureUnitValue'}
             prepared_objs.append(json.dumps(prepared_obj))
+        if isinstance(o, models.SwitchUnitValue):
+            serializer_obj = json.dumps(serializers.SwitchUnitValueSerializer(o).data)
+            prepared_obj = {'data': serializer_obj,
+                            'type': 'SwitchUnitValue'}
+            prepared_objs.append(json.dumps(prepared_obj))
 
     connected_units = models.ConnectedUnit.objects.filter(from_unit=unit)
     for connected_unit in connected_units:

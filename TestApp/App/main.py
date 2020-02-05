@@ -24,7 +24,7 @@ def on_disconnect(*args, **kwargs):
 
 
 def mqtt_callback(client, userdata, msg):
-    print(msg)
+    print(msg.payload)
     decoded_msg = json.loads(msg.payload)
     if decoded_msg['device'] == 13:
         if decoded_msg['unit'] == 7:
