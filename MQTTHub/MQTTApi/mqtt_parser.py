@@ -17,8 +17,8 @@ serializers = None
 def mqtt_callback(client, userdata, message):
     global models
     global serializers
-    print(message)
-    obj = json.loads(message.payload)
+    print(message.payload)
+    obj = json.loads(message.payload if not isinstance(message.payload, bytes) else message.payload.decode("UTF-8"))
     if 'device' not in obj or 'unit' not in obj or 'data' not in obj:
         return
 
