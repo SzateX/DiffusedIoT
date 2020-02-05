@@ -37,8 +37,6 @@ def mqtt_callback(client, userdata, message):
     else:
         return
 
-    print("DUPA")
-
     prepared_objs = []
 
     for o in objs:
@@ -54,9 +52,8 @@ def mqtt_callback(client, userdata, message):
                             'type': 'SwitchUnitValue'}
             prepared_objs.append(json.dumps(prepared_obj))
 
-    print("DUPA2")
-
     connected_units = models.ConnectedUnit.objects.filter(from_unit=unit)
+    print(connected_units)
     for connected_unit in connected_units:
         payload = {
             'device': connected_unit.dest_device,
@@ -64,6 +61,7 @@ def mqtt_callback(client, userdata, message):
             'data': prepared_objs
         }
         hub = AuthServiceApi.get_hub(connected_unit.dest_hub)
+        print(hub)
         InternalApi.send_data_to_unit(hub, payload)
 
     print("DUPA3")
